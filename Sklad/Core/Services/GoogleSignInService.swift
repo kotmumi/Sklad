@@ -9,7 +9,7 @@ import GoogleSignIn
 
 final class GoogleSignInService: GoogleSignIn {
     
-    func getToken() async throws -> String? {
+    func getToken() -> String? {
             GIDSignIn.sharedInstance.currentUser?.accessToken.tokenString
     }
     

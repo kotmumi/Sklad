@@ -12,10 +12,7 @@ class MainViewController: UIViewController {
     
     private var objects: GoogleSheetResponse?
     private var writeObjects: GoogleSheetResponse?
-    private let googleSheetsManager = GoogleSheetsManager()
-    
-    let spreadsheetId = "1YDfMuU23ZiDN8HegT4OgMkWXp--Vv9o2QwXNqPDTHik"// таблица с отстатками
-    let range = "'Остатки технопарка'"
+    private let googleSheetsManager: GoogleSheetsService = GoogleSheetsDataService()
     
     private var items: [Item] = []
     private var itemsInCollection = [Item]()
@@ -48,11 +45,11 @@ class MainViewController: UIViewController {
     }
     
     private func fetchData() async throws {
-        objects = try await googleSheetsManager.fetchDataFromGoogleSheetsAsync(spreadsheetId: spreadsheetId, range: range)
+        objects = try await googleSheetsManager.fetchData(spreadsheetId: Spreadsheet.StorageSheet.id, range: Spreadsheet.StorageSheet.storageList)
         guard let objects else {return}
         itemsAdd(objects)
         
-        writeObjects = try await googleSheetsManager.fetchDataFromGoogleSheetsAsync(spreadsheetId: "1PUZLv4J3XC9CGTmvmia_nEP0ZW12pZmciC1PA0hFnw4", range: "'Списание Июль 2025'")
+        writeObjects = try await googleSheetsManager.fetchData(spreadsheetId: Spreadsheet.WriteOffSheet.id, range: Spreadsheet.WriteOffSheet.writeOffList())
         guard let obj = writeObjects else {return}
         writeCountAdd(obj)
         
@@ -66,7 +63,7 @@ class MainViewController: UIViewController {
         navigationItem.searchController?.searchBar.delegate = self
         navigationItem.searchController?.searchBar.searchTextField.delegate = self
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
-        navigationController?.navigationBar.setTransparentGradient()
+        //navigationController?.navigationBar.setTransparentGradient()
         
         if #available(iOS 15.0, *) {
             navigationItem.scrollEdgeAppearance = navigationItem.standardAppearance
@@ -83,15 +80,15 @@ class MainViewController: UIViewController {
         mainView.collectionView.refreshControl = refreshControl
         refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
         
-        guard let navControll =  navigationController as? CustomNavigationController else {return}
-        navControll.filterButton.addTarget(self, action: #selector(tapFilterButton), for: .touchUpInside)
+       // guard let navControll =  navigationController as? CustomNavigationController else {return}
+        //navControll.filterButton.addTarget(self, action: #selector(tapFilterButton), for: .touchUpInside)
     }
 
     @objc
     private func tapFilterButton() {
-        let vc = FilterViewController(selectedCharRacts: selectedChars, selectedNumberRacts: selectedNumbers)
-        vc.filterDelegate = self
-        navigationController?.pushViewController(vc, animated: true)
+      //  let vc = FilterViewController(selectedCharRacts: selectedChars, selectedNumberRacts: selectedNumbers)
+        //vc.filterDelegate = self
+        //navigationController?.pushViewController(vc, animated: true)
     }
     
     @objc
@@ -130,8 +127,8 @@ extension MainViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
-        let vc = DetailsViewController(item: itemsInCollection[indexPath.row])
-        navigationController?.pushViewController(vc, animated: true)
+      //  let vc = DetailsViewController(item: itemsInCollection[indexPath.row])
+        //navigationController?.pushViewController(vc, animated: true)
     }
 }
 
@@ -139,13 +136,13 @@ extension MainViewController: UITextFieldDelegate {
 
     func textFieldDidChangeSelection(_ textField: UITextField) {
         
-        if textField.text != "" {
-            filter(selectedChars: selectedChars, selectedNumbers: selectedNumbers)
-            itemsInCollection = itemsInCollection.filter { $0.name.lowercased().contains(textField.text!.lowercased()) }
+//        if textField.text != "" {
+//            filter(selectedChars: selectedChars, selectedNumbers: selectedNumbers)
+            //itemsInCollection = itemsInCollection.filter { $0.name.lowercased().contains(textField.text!.lowercased()) }
             mainView.collectionView.reloadData()
-        } else {
-            filter(selectedChars: selectedChars, selectedNumbers: selectedNumbers)
-        }
+//        } else {
+//            filter(selectedChars: selectedChars, selectedNumbers: selectedNumbers)
+//        }
     }
 }
 
@@ -172,7 +169,7 @@ extension MainViewController {
                     comment = obj[10]
                 }
             
-                items.append(Item(name: name, actualName: actualName, price: price, totalPrice: totalPrice, quantity: quantity, unit: unit, imageURL: nil, charRack: charRack, numberRack: numberRack, row: nil, comment: comment))
+             //   items.append(Item(name: name, actualName: actualName, price: price, totalPrice: totalPrice, quantity: quantity, unit: unit, imageURL: nil, charRack: charRack, numberRack: numberRack, row: nil, comment: comment))
             }
         }
     }
@@ -182,16 +179,16 @@ extension MainViewController {
             let name = objects.values[i][0]
             let status = objects.values[i][5]
             let count = Double(objects.values[i][2].replacingOccurrences(of: ",", with: ".").replacingOccurrences(of: "\\s", with: "")) ?? 0.0
-            if let index = items.firstIndex(where: {
-                $0.name == name || $0.name.dropFirst(3) == name
-            }) {
+          //  if let index = items.firstIndex(where: {
+            //    $0.name == name || $0.name.dropFirst(3) == name
+          //  }) {
                 if status == "Взял на тесты" {
-                    items[index].testCount += count
+                 //   items[index].testCount += count
                 } else {
-                    items[index].writeCount += count
+                   // items[index].writeCount += count
                 }
                 
-            }
+           // }
         }
     }
     
@@ -237,14 +234,14 @@ extension MainViewController {
             guard let searchControll = self.navigationItem.searchController else {
                 return
             }
-            guard let navigationController = self.navigationController as? CustomNavigationController else { return }
+           // guard let navigationController = self.navigationController as? CustomNavigationController else { return }
             
-            navigationController.filterButton.isHidden = true
-            searchControll.searchBar.showsCancelButton = true
-            searchControll.searchBar.searchTextField.layer.borderColor = UIColor.black.cgColor
-            DispatchQueue.main.async() {
-                searchControll.searchBar.becomeFirstResponder()
-            }
+//            navigationController.filterButton.isHidden = true
+//            searchControll.searchBar.showsCancelButton = true
+//            searchControll.searchBar.searchTextField.layer.borderColor = UIColor.black.cgColor
+//            DispatchQueue.main.async() {
+//                searchControll.searchBar.becomeFirstResponder()
+//            }
             // navigationController.navigationItem.hidesBackButton = true
             //let vc = SearchViewController(search: searchControll)
             //vc.navigationItem.hidesBackButton = true
@@ -254,14 +251,14 @@ extension MainViewController {
         
         func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
             
-            guard let navigationController = self.navigationController as? CustomNavigationController else { return }
+           // guard let navigationController = self.navigationController as? CustomNavigationController else { return }
             
-            guard let searchControll = self.navigationItem.searchController else {
-                return
-            }
-            searchControll.searchBar.searchTextField.layer.borderColor = UIColor.lightGray.cgColor
-            searchControll.searchBar.showsCancelButton = false
-            navigationController.filterButton.isHidden = false
+//            guard let searchControll = self.navigationItem.searchController else {
+//                return
+//            }
+//            searchControll.searchBar.searchTextField.layer.borderColor = UIColor.lightGray.cgColor
+//            searchControll.searchBar.showsCancelButton = false
+//            navigationController.filterButton.isHidden = false
         }
         
     }
@@ -272,27 +269,27 @@ extension MainViewController {
     //    }
     //}
     
-extension MainViewController: FilterDelegate {
-    func setRactFilter(selectedChars: Set<String>, selectedNumbers: Set<String>) {
-        self.selectedChars = selectedChars
-        self.selectedNumbers = selectedNumbers
-    }
-    
-        func filter(selectedChars: Set<String>, selectedNumbers: Set<String>) {
-            if selectedChars.isEmpty && selectedNumbers.isEmpty {
-                itemsInCollection = items
-                mainView.collectionView.reloadData()
-                return
-            }
-            
-            itemsInCollection = items.filter { item in
-                
-                let charFilter = selectedChars.isEmpty || selectedChars.contains(item.charRack)
-                
-                let numberFilter = selectedNumbers.isEmpty || selectedNumbers.contains(item.numberRack)
-                
-                return charFilter && numberFilter
-            }
-            mainView.collectionView.reloadData()
-        }
-}
+//extension MainViewController: FilterDelegate {
+//    func setRactFilter(selectedChars: Set<String>, selectedNumbers: Set<String>) {
+//        self.selectedChars = selectedChars
+//        self.selectedNumbers = selectedNumbers
+//    }
+//    
+//        func filter(selectedChars: Set<String>, selectedNumbers: Set<String>) {
+//            if selectedChars.isEmpty && selectedNumbers.isEmpty {
+//                itemsInCollection = items
+//                mainView.collectionView.reloadData()
+//                return
+//            }
+//            
+//           // itemsInCollection = items.filter { item in
+//                
+//             //   let charFilter = selectedChars.isEmpty || selectedChars.contains(item.charRack)
+//                
+//            //    let numberFilter = selectedNumbers.isEmpty || selectedNumbers.contains(item.numberRack)
+//                
+//              //  return charFilter && numberFilter
+//          ///  }
+//            mainView.collectionView.reloadData()
+//        }
+//}

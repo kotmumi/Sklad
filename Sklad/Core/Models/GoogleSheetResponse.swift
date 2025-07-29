@@ -1,8 +1,8 @@
 //
 //  GoogleSheetResponse.swift
-//  StockTrace
+//  Sklad
 //
-//  Created by Кирилл Котыло on 8.07.25.
+//  Created by Кирилл Котыло on 29.07.25.
 //
 
 struct GoogleSheetResponse: Decodable {

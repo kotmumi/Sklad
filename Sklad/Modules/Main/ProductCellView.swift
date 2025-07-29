@@ -81,8 +81,8 @@ class ProductCellView: UICollectionViewCell {
 
     func config(whit item: Item) {
        let prefix = "10 "
-        nameProductLabel.text = removePrefix(prefix, from: item.name)
-        rackNumberLabel.text = "\(item.category)"
+      //  nameProductLabel.text = removePrefix(prefix, from: item.name)
+    //    rackNumberLabel.text = "\(item.category)"
         
     }
     private func removePrefix(_ prefix: String, from string: String) -> String {
