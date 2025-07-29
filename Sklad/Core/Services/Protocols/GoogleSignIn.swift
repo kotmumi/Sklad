@@ -5,6 +5,8 @@
 //  Created by Кирилл Котыло on 29.07.25.
 //
 
-protocol SignIn: AnyObject {
+// Протокол работы с OAuth Google
+protocol GoogleSignIn: AnyObject {
+    func getToken() async throws -> String?
     func checkUserAuth() async -> Bool
 }

@@ -7,8 +7,12 @@
 
 import GoogleSignIn
 
-
-final class GoogleSignIn: SignIn {
+final class GoogleSignInService: GoogleSignIn {
+    
+    func getToken() async throws -> String? {
+            GIDSignIn.sharedInstance.currentUser?.accessToken.tokenString
+    }
+    
     func checkUserAuth() async -> Bool {
         await withCheckedContinuation { continuation in
             GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in

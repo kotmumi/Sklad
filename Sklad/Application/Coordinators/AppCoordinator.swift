@@ -12,7 +12,7 @@ final class AppCoordinator: Coordinator {
     var childCoordinators: [Coordinator] = []
     var navigationController: UINavigationController
     private let window: UIWindow
-    private let googleSignIn = GoogleSignIn()
+    private let googleSignIn = GoogleSignInService()
     
     init (window: UIWindow) {
         self.window = window
@@ -23,7 +23,7 @@ final class AppCoordinator: Coordinator {
         window.rootViewController = navigationController
         window.makeKeyAndVisible()
         Task {
-            let isAuth = await googleSignIn.checkUserAuth()
+            let isAuth = true//await googleSignIn.checkUserAuth()
             if isAuth {
                 showMainFlow()
             } else {
@@ -34,10 +34,14 @@ final class AppCoordinator: Coordinator {
     }
     
     private func showAuthFlow() {
-        
+        let authCoordinator = AuthCoordinator(navigationController: navigationController)
+        addChild(authCoordinator)
+        authCoordinator.start()
     }
     
     private func showMainFlow() {
-        
+        let mainCoordinator = MainCoordinator(navigationController: navigationController)
+        addChild(mainCoordinator)
+        mainCoordinator.start()
     }
 }
