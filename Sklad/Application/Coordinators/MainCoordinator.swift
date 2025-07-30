@@ -11,7 +11,14 @@ final class MainCoordinator: Coordinator {
     
     var navigationController: UINavigationController
     var childCoordinators: [Coordinator] = []
-    private var tabBarController: UITabBarController = UITabBarController()
+    
+    func start() {
+        DispatchQueue.main.async {
+            let mainVC = MainViewController()
+            self.navigationController.setViewControllers([mainVC], animated: true)
+        }
+        
+    }
     
     init(navigationController: UINavigationController) {
         self.navigationController = navigationController
