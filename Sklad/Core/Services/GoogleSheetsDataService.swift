@@ -24,12 +24,24 @@ final class GoogleSheetsDataService: GoogleSheetsService {
         }
     }
     
-    func fetchData(spreadsheetId: String, range: String, completion: @escaping (Result<GoogleSheetResponse, NetworkError>) -> Void) {
+    private func verifyTokenScopes(token: String) {
+        let url = URL(string: "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=\(token)")!
+        
+        URLSession.shared.dataTask(with: url) { data, _, _ in
+            if let data = data,
+               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let scopes = json["scope"] as? String {
+                print("Токен имеет scope: \(scopes)")
+            }
+        }.resume()
+    }
     
+    func fetchData(spreadsheetId: String, range: String, completion: @escaping (Result<GoogleSheetResponse, NetworkError>) -> Void) {
         guard let token = googleSignInService.getToken() else {
             completion(.failure(.tokenError))
             return
         }
+        verifyTokenScopes(token: token)
         
         let urlString = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId)/values/\(range)"
         
@@ -37,9 +49,11 @@ final class GoogleSheetsDataService: GoogleSheetsService {
             completion(.failure(.invalidURL))
             return
         }
+       
         // 4. Настройка запроса
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
+        request.timeoutInterval = 30
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         request.setValue("application/json", forHTTPHeaderField: "Accept")
         
@@ -52,11 +66,16 @@ final class GoogleSheetsDataService: GoogleSheetsService {
             }
             // 7. Проверка HTTP-ответа
             guard let httpResponse = response as? HTTPURLResponse else {
+                print("🔴 Invalid response: \(response.debugDescription)")
                 completion(.failure(.serverError(statusCode: 0, message: error?.localizedDescription ?? "")))
                 return
             }
+            
+            print("🔵 Status code: \(httpResponse.statusCode)")
+                       print("🔵 Headers: \(httpResponse.allHeaderFields)")
             // 8. Проверка статус-кода
             guard (200..<300).contains(httpResponse.statusCode) else {
+                print("🔴 API error: \(httpResponse.statusCode)")
                 let message = HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode)
                 completion(.failure(.serverError(statusCode: httpResponse.statusCode, message: message)))
                 return

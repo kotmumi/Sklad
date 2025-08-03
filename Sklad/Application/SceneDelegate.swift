@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import GoogleSignIn
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -19,6 +20,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         self.window = window
         appCoordinator = AppCoordinator(window: window)
         appCoordinator?.start()
+        GIDSignIn.sharedInstance.configuration = GIDConfiguration(
+            clientID: "604686124994-m023n34kn046sf59j5icuingeilf97nf.apps.googleusercontent.com",
+            serverClientID: "604686124994-m023n34kn046sf59j5icuingeilf97nf.apps.googleusercontent.com"
+        )
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {

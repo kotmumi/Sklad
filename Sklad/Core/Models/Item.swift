@@ -40,8 +40,8 @@ struct StockInfo {
 }
 
 struct Rack {
-    let section: Character
-    let number: Int
+    let section: String
+    let number: String
     
     var full: String {
         "\(section)\(number)"

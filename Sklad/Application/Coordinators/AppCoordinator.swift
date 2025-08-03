@@ -23,7 +23,7 @@ final class AppCoordinator: Coordinator {
         window.rootViewController = navigationController
         window.makeKeyAndVisible()
         Task {
-            let isAuth = true//await googleSignIn.checkUserAuth()
+            let isAuth = await googleSignIn.checkUserAuth()
             if isAuth {
                 showMainFlow()
             } else {
@@ -40,8 +40,14 @@ final class AppCoordinator: Coordinator {
     }
     
     private func showMainFlow() {
-        let mainCoordinator = MainCoordinator(navigationController: navigationController)
-        addChild(mainCoordinator)
+        DispatchQueue.main.async {
+            let tabBarController = MainTabBarController()
+       
+            let mainCoordinator = MainCoordinator(navigationController: self.navigationController,
+                                                  tabBarController: tabBarController)
+       
+            self.addChild(mainCoordinator)
         mainCoordinator.start()
+        }
     }
 }

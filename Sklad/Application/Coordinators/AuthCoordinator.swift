@@ -11,10 +11,12 @@ final class AuthCoordinator: Coordinator {
     
     var navigationController: UINavigationController
     var childCoordinators: [any Coordinator] = []
-    
+   
     func start() {
-        //let loginVC = LoginViewController()
-        //navigationController.setViewControllers([loginVC], animated: true)
+        DispatchQueue.main.async {
+            let authVC = AuthViewController()
+            self.navigationController.setViewControllers([authVC], animated: true)
+        }
     }
     
     init(navigationController: UINavigationController) {

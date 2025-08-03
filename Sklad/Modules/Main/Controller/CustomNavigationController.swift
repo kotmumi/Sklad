@@ -87,21 +87,6 @@ class CustomNavigationController: UINavigationController {
                 self.filterButton.topAnchor.constraint(equalTo: searchTextField.topAnchor),
             ])
             
-          //  let paddingView = UIView(frame: CGRect(x: 0, y: 0, width: 25, height: height))
-            
-         //   guard let iconView = searchTextField.leftView as? UIImageView  else { return }
-            
-          //  iconView.translatesAutoresizingMaskIntoConstraints = false
-//            paddingView.addSubview(iconView)
-//            
-//            NSLayoutConstraint.activate([
-//                   iconView.leadingAnchor.constraint(equalTo: paddingView.leadingAnchor, constant: 20),
-//                   iconView.centerYAnchor.constraint(equalTo: paddingView.centerYAnchor)
-//               ])
-//        
-//            searchTextField.leftView = paddingView
-//            searchTextField.leftViewMode = .always
-            
             searchTextField.layer.cornerRadius = height/2
             searchTextField.layer.masksToBounds = true
          
@@ -112,7 +97,6 @@ class CustomNavigationController: UINavigationController {
             searchTextField.layer.borderWidth = 1
             searchTextField.layer.borderColor = UIColor.lightGray.cgColor
             
-          //  searchTextField.placeholder = "Поиск по названию"
         }
     }
 }

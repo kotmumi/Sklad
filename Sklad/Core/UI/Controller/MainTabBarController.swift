@@ -19,7 +19,7 @@ class MainTabBarController: UITabBarController {
         let navigationController1 = CustomNavigationController(viewController: MainViewController())
         let vc2 = MainViewController()
         let vc3 = MainViewController()
-        let vc4 = MainViewController()
+        let vc4 = AccountViewController()
         
         navigationController1.tabBarItem = UITabBarItem(title: "Sklad", image: UIImage(systemName: "tray.full.fill"), tag: 0)
         vc2.tabBarItem = UITabBarItem(title: "List", image: UIImage(systemName: "list.bullet.circle.fill"), tag: 1)
