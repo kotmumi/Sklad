@@ -11,6 +11,7 @@ import GoogleSignIn
 class AccountViewController: UIViewController {
     private let authVC = AuthViewController()
     private let accountView = AccountView()
+    weak var coordinator: AppCoordinator?
     
     override func loadView() {
         view = accountView
@@ -34,7 +35,6 @@ class AccountViewController: UIViewController {
                     self.accountView.config()
                 } else {
                     self.accountView.config(user: user)
-                   
                 }
             }
         }
@@ -42,7 +42,6 @@ class AccountViewController: UIViewController {
     
     private func signOut() {
         GIDSignIn.sharedInstance.signOut()
-        authVC.modalPresentationStyle = .fullScreen
-        present(authVC, animated: true)
+        coordinator?.start()
     }
 }

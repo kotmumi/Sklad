@@ -55,6 +55,7 @@ class CustomNavigationController: UINavigationController {
     }
     
     private func setupViewControllers() {
+        
         searchController.searchBar.addSubview(filterButton)
         viewController.navigationController?.navigationBar.layer.borderWidth = 0
         viewController.navigationItem.searchController = searchController
@@ -65,7 +66,6 @@ class CustomNavigationController: UINavigationController {
     
     private func setupSearchBarAppearance () {
         DispatchQueue.main.async {
-            
            guard let searchTextField = self.searchController.searchBar.value(forKey: "searchField") as? UITextField else { return }
             
             searchTextField.translatesAutoresizingMaskIntoConstraints = false
@@ -101,67 +101,67 @@ class CustomNavigationController: UINavigationController {
     }
 }
 
-extension UINavigationBar {
-    func setTransparentGradient() {
-        // 1. Полностью прозрачный фон
-        let emptyImage = UIImage()
-        self.setBackgroundImage(emptyImage, for: .default)
-        self.shadowImage = emptyImage
-        self.isTranslucent = true
-        
-        // 2. Создаем градиентный слой
-        let gradientLayer = CAGradientLayer()
-        gradientLayer.colors = [
-            #colorLiteral(red: 0.9607843137, green: 0.9607843137, blue: 0.9607843137, alpha: 1).withAlphaComponent(0.95).cgColor,
-            #colorLiteral(red: 0.9607843137, green: 0.9607843137, blue: 0.9607843137, alpha: 1).withAlphaComponent(0).cgColor
-        ]
-        gradientLayer.locations = [0, 1]
-        gradientLayer.startPoint = CGPoint(x: 0.5, y: 0)
-        gradientLayer.endPoint = CGPoint(x: 0.5, y: 0.8)
-        
-        // 3. Специальный контейнер для градиента
-//        let gradientView = UIView(frame: CGRect(
-//            x: 0,
-//            y: -UIApplication.shared.statusBarFrame.height,
-//            width: UIScreen.main.bounds.width,
-//            height: self.bounds.height + UIApplication.shared.statusBarFrame.height
-//        ))
-//        gradientView.layer.addSublayer(gradientLayer)
-//        gradientLayer.frame = gradientView.bounds
-        
-        // 4. Создание изображения с прозрачностью
-        let format = UIGraphicsImageRendererFormat()
-        format.opaque = false
-        format.scale = UIScreen.main.scale
-        
-        let renderer = UIGraphicsImageRenderer(size: gradientLayer.bounds.size, format: format)
-        let image = renderer.image { context in
-            // Очищаем фон полностью прозрачным
-            UIColor.clear.setFill()
-            context.fill(CGRect(origin: .zero, size: gradientLayer.bounds.size))
-            
-            // Рендерим градиент
-            gradientLayer.render(in: context.cgContext)
-        }
-        // 5. Настройка для iOS 15+
-        if #available(iOS 15.0, *) {
-            let appearance = UINavigationBarAppearance()
-            appearance.configureWithTransparentBackground()
-            appearance.backgroundEffect = nil
-            appearance.backgroundColor = .clear
-            appearance.backgroundImage = image
-            appearance.shadowColor = nil
-            
-            self.standardAppearance = appearance
-            self.scrollEdgeAppearance = appearance
-        } else {
-            self.setBackgroundImage(image, for: .default)
-        }
-        
-        // 6. Дополнительные фиксы
-        self.backgroundColor = .clear
-        self.barTintColor = .clear
-        self.layer.masksToBounds = false
-        self.layer.shadowOpacity = 0
-    }
-}
+//extension UINavigationBar {
+//    func setTransparentGradient() {
+//        // 1. Полностью прозрачный фон
+//        let emptyImage = UIImage()
+//        self.setBackgroundImage(emptyImage, for: .default)
+//        self.shadowImage = emptyImage
+//        self.isTranslucent = true
+//        
+//        // 2. Создаем градиентный слой
+//        let gradientLayer = CAGradientLayer()
+//        gradientLayer.colors = [
+//            #colorLiteral(red: 0.9607843137, green: 0.9607843137, blue: 0.9607843137, alpha: 1).withAlphaComponent(0.95).cgColor,
+//            #colorLiteral(red: 0.9607843137, green: 0.9607843137, blue: 0.9607843137, alpha: 1).withAlphaComponent(0).cgColor
+//        ]
+//        gradientLayer.locations = [0, 1]
+//        gradientLayer.startPoint = CGPoint(x: 0.5, y: 0)
+//        gradientLayer.endPoint = CGPoint(x: 0.5, y: 0.8)
+//        
+//        // 3. Специальный контейнер для градиента
+////        let gradientView = UIView(frame: CGRect(
+////            x: 0,
+////            y: -UIApplication.shared.statusBarFrame.height,
+////            width: UIScreen.main.bounds.width,
+////            height: self.bounds.height + UIApplication.shared.statusBarFrame.height
+////        ))
+////        gradientView.layer.addSublayer(gradientLayer)
+////        gradientLayer.frame = gradientView.bounds
+//        
+//        // 4. Создание изображения с прозрачностью
+//        let format = UIGraphicsImageRendererFormat()
+//        format.opaque = false
+//        format.scale = UIScreen.main.scale
+//        
+//        let renderer = UIGraphicsImageRenderer(size: gradientLayer.bounds.size, format: format)
+//        let image = renderer.image { context in
+//            // Очищаем фон полностью прозрачным
+//            UIColor.clear.setFill()
+//            context.fill(CGRect(origin: .zero, size: gradientLayer.bounds.size))
+//            
+//            // Рендерим градиент
+//            gradientLayer.render(in: context.cgContext)
+//        }
+//        // 5. Настройка для iOS 15+
+//        if #available(iOS 15.0, *) {
+//            let appearance = UINavigationBarAppearance()
+//            appearance.configureWithTransparentBackground()
+//            appearance.backgroundEffect = nil
+//            appearance.backgroundColor = .clear
+//            appearance.backgroundImage = image
+//            appearance.shadowColor = nil
+//            
+//            self.standardAppearance = appearance
+//            self.scrollEdgeAppearance = appearance
+//        } else {
+//            self.setBackgroundImage(image, for: .default)
+//        }
+//        
+//        // 6. Дополнительные фиксы
+//        self.backgroundColor = .clear
+//        self.barTintColor = .clear
+//        self.layer.masksToBounds = false
+//        self.layer.shadowOpacity = 0
+//    }
+//}

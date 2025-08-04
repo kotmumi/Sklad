@@ -10,6 +10,7 @@ import GoogleSignIn
 
 class MainViewController: UIViewController {
     
+    weak var coordinator: MainCoordinator?
     private var objects: GoogleSheetResponse?
     private var writeObjects: GoogleSheetResponse?
     private let googleSheetsManager: GoogleSheetsService = GoogleSheetsDataService()
@@ -35,10 +36,6 @@ class MainViewController: UIViewController {
         
         super.viewDidLoad()
         setupUI()
-       // if GIDSignIn.sharedInstance.currentUser == nil  {
-         //   self.showAuthError()
-        //}
-        //
         Task {
             print("will fetchData")
             try await fetchData()
@@ -58,8 +55,8 @@ class MainViewController: UIViewController {
         itemsInCollection = items
         
         mainView.collectionView.reloadData()
-        print("fetchData")
-        print(items)
+        //print("fetchData")
+        //print(items)
     }
     
     private func setupUI() {
@@ -98,10 +95,10 @@ class MainViewController: UIViewController {
     @objc
     private func refreshData() {
         Task {
-            print("will refresh")
+           // print("will refresh")
             try await fetchData()
             refreshControl.endRefreshing()
-            print("refresh")
+           // print("refresh")
         }
     }
 }
@@ -132,7 +129,14 @@ extension MainViewController: UICollectionViewDelegateFlowLayout {
 extension MainViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        
+       // coordinator?.goToDetails()
+        guard let coordinator else {
+            print("coordinator is nil")
+            return
+        }
+        print("coordinator: \(coordinator.navigationController.viewControllers)")
+        coordinator.goToDetails()
+      //  print("TAP")
       //  let vc = DetailsViewController(item: itemsInCollection[indexPath.row])
         //navigationController?.pushViewController(vc, animated: true)
     }

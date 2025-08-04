@@ -7,7 +7,6 @@
 
 import UIKit
 
-@MainActor
 class MainView: UIView {
     
     let collectionView: UICollectionView = {

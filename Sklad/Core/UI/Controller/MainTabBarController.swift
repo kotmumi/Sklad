@@ -9,24 +9,41 @@ import UIKit
 
 class MainTabBarController: UITabBarController {
     
+  //  private let mainCoordinator: MainCoordinator
+   // var navigationController1: CustomNavigationController
+   // let mainVC = MainViewController()
+    
+   // override init() {//_ mainCoordinator: MainCoordinator) {
+     //   self.mainCoordinator = mainCoordinator
+       // mainVC.mainCoordinator = mainCoordinator
+        // navigationController1 = CustomNavigationController(viewController: mainVC)
+     //   super.init(nibName: nil, bundle: nil)
+     
+    //}
+    
+//    required init?(coder: NSCoder) {
+//        fatalError("init(coder:) has not been implemented")
+//    }
+//
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViewControllers()
         setupTabBarAppearance()
     }
+
     private func setupViewControllers() {
-        DispatchQueue.main.async {
-        let navigationController1 = CustomNavigationController(viewController: MainViewController())
-        let vc2 = MainViewController()
-        let vc3 = MainViewController()
+        DispatchQueue.main.async { 
+            let navigationController1 = CustomNavigationController(viewController: MainViewController())
+            let vc2 = MainViewController()
+            let vc3 = MainViewController()
         let vc4 = AccountViewController()
         
         navigationController1.tabBarItem = UITabBarItem(title: "Sklad", image: UIImage(systemName: "tray.full.fill"), tag: 0)
         vc2.tabBarItem = UITabBarItem(title: "List", image: UIImage(systemName: "list.bullet.circle.fill"), tag: 1)
-        vc3.tabBarItem = UITabBarItem(title: "Scaner", image: UIImage(systemName: "barcode"), tag: 2)
-        vc4.tabBarItem = UITabBarItem(title: "Account", image: UIImage(systemName: "person.crop.circle"), tag: 3)
+        //vc3.tabBarItem = UITabBarItem(title: "Scaner", image: UIImage(systemName: "barcode"), tag: 2)
+        vc3.tabBarItem = UITabBarItem(title: "Account", image: UIImage(systemName: "person.crop.circle"), tag: 2)
        
-            self.viewControllers = [navigationController1, vc2, vc3, vc4]
+            //self.viewControllers = [self.navigationController1, vc2, vc3, vc4]
         }
     }
     

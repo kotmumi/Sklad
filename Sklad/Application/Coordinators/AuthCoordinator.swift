@@ -9,18 +9,28 @@ import UIKit
 
 final class AuthCoordinator: Coordinator {
     
+    weak var parentCoordinator: (Coordinator)?
     var navigationController: UINavigationController
-    var childCoordinators: [any Coordinator] = []
-   
-    func start() {
-        DispatchQueue.main.async {
-            let authVC = AuthViewController()
-            self.navigationController.setViewControllers([authVC], animated: true)
-        }
-    }
+    var childCoordinators: [Coordinator] = []
+    
+    var onAuthSuccess: (() -> Void)?
     
     init(navigationController: UINavigationController) {
         self.navigationController = navigationController
     }
     
+    func start() {
+            let authVC = AuthViewController()
+            authVC.coordinator = self
+            self.navigationController.setViewControllers([authVC], animated: true)
+    }
+    
+    func handleAuthSuccess(token: String) {
+            onAuthSuccess?()
+            navigationController.dismiss(animated: true)
+        }
+        
+        deinit {
+            print("AuthCoordinator deallocated")
+        }
 }

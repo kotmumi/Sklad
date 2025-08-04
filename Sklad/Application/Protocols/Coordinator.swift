@@ -7,19 +7,33 @@
 
 import UIKit
 
-
 protocol Coordinator: AnyObject {
-    var childCoordinators: [Coordinator] { get set}
-    var navigationController: UINavigationController { get set}
+    
+    var childCoordinators: [Coordinator] { get set }
+    var parentCoordinator: Coordinator? { get set }
+    
     func start()
+    func finish()
 }
 
 extension Coordinator {
+    
     func addChild(_ coordinator: Coordinator) {
+        coordinator.parentCoordinator = self
         childCoordinators.append(coordinator)
     }
     
     func removeChild(_ coordinator: Coordinator) {
-        childCoordinators = childCoordinators.filter { $0 !== coordinator }
+        childCoordinators.removeAll { $0 === coordinator }
+    }
+    
+    func removeAllChildren() {
+        childCoordinators.forEach { $0.finish() }
+        childCoordinators.removeAll()
+    }
+    
+    func finish() {
+        parentCoordinator?.removeChild(self)
+        removeAllChildren()
     }
 }

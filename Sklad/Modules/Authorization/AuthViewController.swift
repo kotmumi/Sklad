@@ -11,6 +11,7 @@ import GoogleSignIn
 class AuthViewController: UIViewController {
     
     private let authView = AuthView()
+    weak var coordinator: AuthCoordinator?
     
     override func loadView() {
         view = authView
@@ -23,19 +24,18 @@ class AuthViewController: UIViewController {
 
     private func setupUI() {
         authView.signInButton.addTarget(self, action: #selector(googleSignIn), for: .touchUpInside)
-    
     }
     
     @objc
     private func googleSignIn() {
-        let scopes = ["https://www.googleapis.com/auth/spreadsheets"] // Чтение таблиц
+        let scopes = ["https://www.googleapis.com/auth/spreadsheets"]
                                   
         GIDSignIn.sharedInstance.signIn(
             withPresenting: self,
             hint: nil,
             additionalScopes: scopes
-        ) { result, error in
-            
+        ) { [weak self] result, error in
+            guard let self else { return }
             if let error = error {
                 print("Error: \(error.localizedDescription)")
                 return
@@ -44,8 +44,7 @@ class AuthViewController: UIViewController {
             guard let user = result?.user else { return }
             let email = user.profile?.email ?? "No email"
             print("Успешный вход пользователя: \(email)")
-            let mainVC = MainTabBarController()
-            self.view.window?.rootViewController = mainVC
+            self.coordinator?.handleAuthSuccess(token: user.accessToken.tokenString)
         }
     }
 }

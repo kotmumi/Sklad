@@ -9,37 +9,23 @@ import UIKit
 
 final class MainCoordinator: Coordinator {
     
+    weak var parentCoordinator: (any Coordinator)?
     var navigationController: UINavigationController
     var childCoordinators: [Coordinator] = []
-    private let tabBarController: MainTabBarController
+    var tabBarController: MainTabBarController?
   
-    init(navigationController: UINavigationController, tabBarController: MainTabBarController) {
-        self.tabBarController = tabBarController
+    init(navigationController: UINavigationController) {
         self.navigationController = navigationController
+        print(navigationController.viewControllers)
     }
     
     func start() {
-        DispatchQueue.main.async {
-          //  self.setupTabBar()
-            self.navigationController.setViewControllers([self.tabBarController], animated: true)
-        }
-        
+        let mainVC = MainViewController()
+            mainVC.coordinator = self
+            navigationController.setViewControllers([mainVC], animated: false)
+        print(navigationController.viewControllers)
     }
-//    func setupTabBar() {
-//        let navigationController1 = CustomNavigationController(viewController: MainViewController())
-//        let navigationController2 = UINavigationController(rootViewController: MainViewController())
-//        let navigationController3 = UINavigationController(rootViewController: MainViewController())
-//        let navigationController4 = UINavigationController(rootViewController: MainViewController())
-//        
-//        navigationController1.tabBarItem = UITabBarItem(title: "Sklad", image: UIImage(systemName: "tray.full.fill"), tag: 0)
-//        navigationController2.tabBarItem = UITabBarItem(title: "List", image: UIImage(systemName: "list.bullet.circle.fill"), tag: 1)
-//        navigationController3.tabBarItem = UITabBarItem(title: "Scaner", image: UIImage(systemName: "barcode"), tag: 2)
-//        navigationController4.tabBarItem = UITabBarItem(title: "Account", image: UIImage(systemName: "person.crop.circle"), tag: 3)
-//        
-//        tabBarController.viewControllers = [navigationController1, navigationController2, navigationController3, navigationController4]
-//        
-//    }
-//    
+  
     func goToFilter() {
         
     }
@@ -49,6 +35,9 @@ final class MainCoordinator: Coordinator {
     }
     
     func goToDetails() {
-        
+        let detailsCoordinator = DetailsCoordinator(navigationController: navigationController)
+        detailsCoordinator.parentCoordinator = self
+        addChild(detailsCoordinator)
+        detailsCoordinator.start()
     }
 }

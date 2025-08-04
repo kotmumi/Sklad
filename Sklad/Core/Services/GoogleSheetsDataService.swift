@@ -24,24 +24,24 @@ final class GoogleSheetsDataService: GoogleSheetsService {
         }
     }
     
-    private func verifyTokenScopes(token: String) {
-        let url = URL(string: "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=\(token)")!
-        
-        URLSession.shared.dataTask(with: url) { data, _, _ in
-            if let data = data,
-               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-               let scopes = json["scope"] as? String {
-                print("Токен имеет scope: \(scopes)")
-            }
-        }.resume()
-    }
+//    private func verifyTokenScopes(token: String) {
+//        let url = URL(string: "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=\(token)")!
+//        
+//        URLSession.shared.dataTask(with: url) { data, _, _ in
+//            if let data = data,
+//               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+//               let scopes = json["scope"] as? String {
+//                //print("Токен имеет scope: \(scopes)")
+//            }
+//        }.resume()
+//    }
     
     func fetchData(spreadsheetId: String, range: String, completion: @escaping (Result<GoogleSheetResponse, NetworkError>) -> Void) {
         guard let token = googleSignInService.getToken() else {
             completion(.failure(.tokenError))
             return
         }
-        verifyTokenScopes(token: token)
+       // verifyTokenScopes(token: token)
         
         let urlString = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId)/values/\(range)"
         
@@ -71,8 +71,8 @@ final class GoogleSheetsDataService: GoogleSheetsService {
                 return
             }
             
-            print("🔵 Status code: \(httpResponse.statusCode)")
-                       print("🔵 Headers: \(httpResponse.allHeaderFields)")
+           // print("🔵 Status code: \(httpResponse.statusCode)")
+                     //  print("🔵 Headers: \(httpResponse.allHeaderFields)")
             // 8. Проверка статус-кода
             guard (200..<300).contains(httpResponse.statusCode) else {
                 print("🔴 API error: \(httpResponse.statusCode)")
@@ -167,12 +167,12 @@ final class GoogleSheetsDataService: GoogleSheetsService {
             // 5. Парсинг JSON ответа
             do {
                 let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-                print("Success response: \(json ?? [:])")
+                //print("Success response: \(json ?? [:])")
                 
                 // Пример обработки успешного ответа
                 if let updates = json?["updates"] as? [String: Any],
                    let updatedRows = updates["updatedRows"] as? Int {
-                    print("Updated rows: \(updatedRows)")
+                    //print("Updated rows: \(updatedRows)")
                     completion(.success(()))
                 }
             } catch {
