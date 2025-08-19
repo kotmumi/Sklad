@@ -18,6 +18,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let scene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: scene)
         self.window = window
+        if #available(iOS 13.0, *) {
+            self.window?.overrideUserInterfaceStyle = .light
+        }
         appCoordinator = AppCoordinator(window: window)
         appCoordinator?.start()
         GIDSignIn.sharedInstance.configuration = GIDConfiguration(
