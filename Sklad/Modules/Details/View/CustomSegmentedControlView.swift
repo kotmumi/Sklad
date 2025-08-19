@@ -30,14 +30,12 @@ class CustomSegmentedControlView: UIView {
     private func setupUI() {
         translatesAutoresizingMaskIntoConstraints = false
         backgroundColor = .background
-
         addSubview(segmentedControl)
     }
     
     private func setConstraints() {
         NSLayoutConstraint.activate([
 
-            // Segmented Control
             segmentedControl.topAnchor.constraint(equalTo: topAnchor, constant: 8),
             segmentedControl.heightAnchor.constraint(equalToConstant: 32),
             segmentedControl.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
