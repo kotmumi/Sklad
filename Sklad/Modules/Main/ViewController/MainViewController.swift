@@ -48,7 +48,7 @@ class MainViewController: UIViewController {
         guard let objects else {return}
         itemsAdd(objects)
         
-        writeObjects = try await googleSheetsManager.fetchData(spreadsheetId: Spreadsheet.WriteOffSheet.id, range: Spreadsheet.WriteOffSheet.writeOffList())
+        writeObjects = try await googleSheetsManager.fetchData(spreadsheetId: Spreadsheet.WriteOffSheet.id,range: Spreadsheet.WriteOffSheet.writeOffList())
         guard let obj = writeObjects else {return}
         writeCountAdd(obj)
         
@@ -191,22 +191,35 @@ extension MainViewController {
     
     private func writeCountAdd(_ objects: GoogleSheetResponse) {
         for i in 2..<objects.values.count {
+            guard objects.values[i].indices.contains(0),
+                  objects.values[i].indices.contains(2),
+                  objects.values[i].indices.contains(5)
+            else {
+                print("Ошибка: неверный формат данных в строке \(i)")
+                continue
+            }
+            
             let name = objects.values[i][0]
             let status = objects.values[i][5]
-            let count = Double(objects.values[i][2].replacingOccurrences(of: ",", with: ".").replacingOccurrences(of: "\\s", with: "")) ?? 0.0
-            if let index = items.firstIndex(where: {
+            
+            let countString = objects.values[i][2]
+                .replacingOccurrences(of: ",", with: ".")
+                .replacingOccurrences(of: " ", with: "")
+            
+            let count = Double(countString) ?? 0.0
+            
+            // let count = Double(objects.values[i][2].replacingOccurrences(of: ",", with: ".").replacingOccurrences(of: "\\s", with: "")) ?? 0.0
+            if let index = self.items.firstIndex(where: {
                 $0.details.commercialName == name || $0.details.commercialName.dropFirst(3) == name
             }) {
                 if status == "Взял на тесты" {
-                    items[index].stock.testedQuantity += count
+                    self.items[index].stock.testedQuantity += count
                 } else {
-                    items[index].stock.allocatedQuantity += count
+                    self.items[index].stock.allocatedQuantity += count
                 }
-                
             }
         }
     }
-    
     
     private func googleSignIn() {
         let scopes = ["https://www.googleapis.com/auth/spreadsheets"]
