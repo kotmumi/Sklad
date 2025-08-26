@@ -32,7 +32,7 @@ struct StockInfo {
     var totalQuantity: Double
     var allocatedQuantity: Double = 0.0
     var testedQuantity: Double = 0.0
-    var Unit: String
+    var unit: String
     
     var availableQuantity: Double {
         totalQuantity - allocatedQuantity - testedQuantity
