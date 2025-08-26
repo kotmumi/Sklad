@@ -22,7 +22,8 @@ class FilterViewController: UIViewController {
     
     private lazy var racts: [[String]] = [charRacts, numberRacts]
     private let filterView = FilterView()
-     var filterDelegate: FilterDelegate?
+    var filterDelegate: FilterDelegate?
+    weak var coordinator: FilterCoordinator?
     
     init(selectedCharRacts: Set<String>, selectedNumberRacts: Set<String>) {
         self.selectedCharRacts = selectedCharRacts
@@ -59,15 +60,14 @@ class FilterViewController: UIViewController {
     @objc private func cancel() {
         selectedCharRacts.removeAll()
         selectedNumberRacts.removeAll()
-        print("selectedCharRacts - \(selectedCharRacts)")
-        print("selectedNumberRacts - \(selectedNumberRacts)")
         filterView.RactsCharCollectionView.reloadData()
     }
     
     @objc private func tapAcceptButton() {
         filterDelegate?.filter(selectedChars: selectedCharRacts, selectedNumbers: selectedNumberRacts)
         filterDelegate?.setRactFilter(selectedChars: selectedCharRacts, selectedNumbers: selectedNumberRacts)
-        navigationController?.popViewController(animated: true)
+        coordinator?.stop()
+        
     }
 }
 
