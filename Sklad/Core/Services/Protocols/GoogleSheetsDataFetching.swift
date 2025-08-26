@@ -18,4 +18,7 @@ protocol GoogleSheetsDataFetching {
     
     // Получение данных с callback
     func fetchData(spreadsheetId: String, range: String, completion: @escaping (Result<GoogleSheetResponse, NetworkError>) -> Void)
+    
+    //Получение данных с пагинацией
+    func fetchData(spreadsheetId: String, range: String, limit: Int, offset: Int) async throws -> GoogleSheetResponse
 }

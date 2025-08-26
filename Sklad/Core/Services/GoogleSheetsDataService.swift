@@ -8,6 +8,35 @@
 import Foundation
 
 final class GoogleSheetsDataService: GoogleSheetsService {
+    
+    
+    func fetchData(spreadsheetId: String, range: String, limit: Int, offset: Int) async throws -> GoogleSheetResponse {
+        
+        guard let token = googleSignInService.getToken() else {
+            throw NetworkError.tokenError
+        }
+        
+        var components = URLComponents(string: "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId)/values/\(range)")
+        components?.queryItems = [
+            URLQueryItem(name: "majorDimension", value: "ROWS"),
+            URLQueryItem(name: "maxResults", value: "\(limit)"),
+            URLQueryItem(name: "startIndex", value: "\(offset)")
+        ]
+        guard let url = components?.url else {
+            throw NetworkError.invalidURL
+        }
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.timeoutInterval = 30
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        
+        let (data, _) = try await URLSession.shared.data(for: request)
+        let response = try JSONDecoder().decode(GoogleSheetResponse.self, from: data)
+        return response
+        
+    }
+    
     private let googleSignInService: GoogleSignInService = GoogleSignInService()
     
     
@@ -171,7 +200,7 @@ final class GoogleSheetsDataService: GoogleSheetsService {
                 
                 // Пример обработки успешного ответа
                 if let updates = json?["updates"] as? [String: Any],
-                   let updatedRows = updates["updatedRows"] as? Int {
+                   let _ = updates["updatedRows"] as? Int {
                     //print("Updated rows: \(updatedRows)")
                     completion(.success(()))
                 }
