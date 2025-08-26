@@ -149,4 +149,23 @@ final class InfoViewCell: UITableViewCell {
             separatorBottom.widthAnchor.constraint(equalTo: verticalStackView.widthAnchor)
         ])
     }
+    
+    func config(item: Item) {
+        name.text = item.details.commercialName
+        actualName.text = item.details.technicalName
+        count.text = "\(formatNumber(item.stock.availableQuantity)) \(item.stock.unit)"
+        comment.text = item.details.discription
+        priceView.config(item: item)
+    }
+}
+
+func formatNumber(_ value: Double) -> String {
+    if value.truncatingRemainder(dividingBy: 1) == 0 {
+        if value == 0.0 {
+            return "-"
+        }
+        return String(Int(value))
+    } else {
+        return String(value)
+    }
 }

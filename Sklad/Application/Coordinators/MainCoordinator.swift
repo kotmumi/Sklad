@@ -9,9 +9,10 @@ import UIKit
 
 final class MainCoordinator: Coordinator {
     
+    var childCoordinators: [Coordinator] = []
     weak var parentCoordinator: (any Coordinator)?
     var navigationController: UINavigationController
-    var childCoordinators: [Coordinator] = []
+    
     var tabBarController: MainTabBarController?
   
     init(navigationController: UINavigationController) {
@@ -26,16 +27,19 @@ final class MainCoordinator: Coordinator {
         print(navigationController.viewControllers)
     }
   
-    func goToFilter() {
-        
+    func goToFilter(selectedCharRacts: Set<String>, selectedNumberRacts: Set<String>) {
+        let filterCoordinator = FilterCoordinator(navigationController: navigationController)
+        filterCoordinator.parentCoordinator = self
+        addChild(filterCoordinator)
+        filterCoordinator.start(selectedCharRacts, selectedNumberRacts)
     }
     
     func goToSearch() {
         
     }
     
-    func goToDetails() {
-        let detailsCoordinator = DetailsCoordinator(navigationController: navigationController)
+    func goToDetails(item: Item, writeOff: [ItemWriteOff]) {
+        let detailsCoordinator = DetailsCoordinator(navigationController: navigationController, item: item, writeOff: writeOff)
         detailsCoordinator.parentCoordinator = self
         addChild(detailsCoordinator)
         detailsCoordinator.start()

@@ -9,9 +9,10 @@ import UIKit
 
 final class AuthCoordinator: Coordinator {
     
-    weak var parentCoordinator: (Coordinator)?
-    var navigationController: UINavigationController
     var childCoordinators: [Coordinator] = []
+    weak var parentCoordinator: Coordinator?
+    var navigationController: UINavigationController
+    
     
     var onAuthSuccess: (() -> Void)?
     

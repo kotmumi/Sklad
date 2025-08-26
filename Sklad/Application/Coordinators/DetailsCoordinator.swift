@@ -9,17 +9,22 @@ import UIKit
 
 class DetailsCoordinator: Coordinator {
     
-    weak var parentCoordinator: (Coordinator)?
     var childCoordinators: [Coordinator] = []
+    weak var parentCoordinator: Coordinator?
     var navigationController: UINavigationController
     
-    init(navigationController: UINavigationController) {
+    private let item: Item
+    private var writeOff: [ItemWriteOff]
+    
+    init(navigationController: UINavigationController, item: Item, writeOff: [ItemWriteOff]) {
         self.navigationController = navigationController
+        self.item = item
+        self.writeOff = writeOff
         print("DetailsCoordinator init")
     }
     
     func start() {
-        let detailsVC = DetailsViewController()
+        let detailsVC = DetailsViewController(item: item, writeOff: writeOff)
         detailsVC.coordinator = self
         navigationController.tabBarController?.isTabBarHidden = true
         self.navigationController.pushViewController(detailsVC, animated: true)
@@ -27,5 +32,10 @@ class DetailsCoordinator: Coordinator {
     
     deinit {
         print("DetailsCoordinator deinit")
+    }
+    
+    func goToWriteOff() {
+        let writeOffVC = WriteOffViewController()
+        navigationController.present(writeOffVC, animated: true)
     }
 }

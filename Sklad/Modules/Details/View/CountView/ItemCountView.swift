@@ -94,4 +94,28 @@ final class ItemCountView: UIView {
             countAll.trailingAnchor.constraint(equalTo: countAllLabel.trailingAnchor),
         ])
     }
+    
+    func config(item: Item) {
+        
+        let availableCount = item.stock.availableQuantity
+        let testCount = item.stock.testedQuantity
+        let writeOffCount = item.stock.allocatedQuantity
+        let allCount = item.stock.totalQuantity
+        
+        countAvailable.text = formatNumber(availableCount)
+        countTest.text = formatNumber(testCount)
+        countWriteOff.text = formatNumber(writeOffCount)
+        countAll.text = formatNumber(allCount) + " \(item.stock.unit)"
+    }
+    
+    func formatNumber(_ value: Double) -> String {
+        if value.truncatingRemainder(dividingBy: 1) == 0 {
+            if value == 0.0 {
+                return "-"
+            }
+            return String(Int(value))
+        } else {
+            return String(value)
+        }
+    }
 }

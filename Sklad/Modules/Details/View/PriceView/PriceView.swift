@@ -55,4 +55,9 @@ final class PriceView: UIView {
             separator.widthAnchor.constraint(equalToConstant: 1),
         ])
     }
+    
+    func config(item: Item) {
+        priceView.priceLabel.text = item.pricing.price
+        totalPriceView.priceLabel.text = item.pricing.totalPrice
+    }
 }

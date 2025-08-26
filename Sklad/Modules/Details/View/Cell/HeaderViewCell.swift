@@ -35,4 +35,8 @@ final class HeaderViewCell: UITableViewCell {
             itemCount.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16)
         ])
     }
+    
+    func config(item: Item) {
+        itemCount.config(item: item)
+    }
 }

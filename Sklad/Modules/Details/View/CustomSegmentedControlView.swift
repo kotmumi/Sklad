@@ -10,7 +10,7 @@ import UIKit
 class CustomSegmentedControlView: UIView {
     
      let segmentedControl: UISegmentedControl = {
-        let segment = UISegmentedControl(items: ["Активный", "На тесте", "Списанное"])
+        let segment = UISegmentedControl(items: ["Доступно", "На тесте", "Списано"])
         segment.selectedSegmentIndex = 0
         segment.translatesAutoresizingMaskIntoConstraints = false
         segment.layer.cornerRadius = 16

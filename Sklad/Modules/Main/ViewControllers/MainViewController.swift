@@ -18,6 +18,8 @@ class MainViewController: UIViewController {
     private var items: [Item] = []
     private var itemsInCollection = [Item]()
     
+    private var itemsWriteOff: [ItemWriteOff] = []
+    
     private var selectedChars = Set<String>()
     private var selectedNumbers = Set<String>()
    
@@ -55,8 +57,6 @@ class MainViewController: UIViewController {
         itemsInCollection = items
         
         mainView.collectionView.reloadData()
-        //print("fetchData")
-        //print(items)
     }
     
     private func setupUI() {
@@ -64,14 +64,6 @@ class MainViewController: UIViewController {
         navigationItem.searchController?.searchBar.delegate = self
         navigationItem.searchController?.searchBar.searchTextField.delegate = self
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
-        //navigationController?.navigationBar.setTransparentGradient()
-        
-//        if #available(iOS 15.0, *) {
-//            navigationItem.scrollEdgeAppearance = navigationItem.standardAppearance
-//        }
-        
-        // Отключаем тень при скролле
-        //navigationController?.navigationBar.layer.shadowOpacity = 0
         
         mainView.collectionView.delegate = self
         mainView.collectionView.dataSource = self
@@ -87,19 +79,13 @@ class MainViewController: UIViewController {
 
     @objc
     private func tapFilterButton() {
-//        let vc = FilterViewController(selectedCharRacts: selectedChars, selectedNumberRacts: selectedNumbers)
-//        vc.filterDelegate = self
-//        navigationController?.pushViewController(vc, animated: true)
+        coordinator?.goToFilter(selectedCharRacts: selectedChars, selectedNumberRacts: selectedNumbers)
     }
     
     @objc
-    private func refreshData() {
-        Task {
-           // print("will refresh")
+    private func refreshData() async throws {
             try await fetchData()
             refreshControl.endRefreshing()
-           // print("refresh")
-        }
     }
 }
 
@@ -129,16 +115,10 @@ extension MainViewController: UICollectionViewDelegateFlowLayout {
 extension MainViewController: UICollectionViewDelegate {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-       // coordinator?.goToDetails()
-        guard let coordinator else {
-            print("coordinator is nil")
-            return
-        }
-        print("coordinator: \(coordinator.navigationController.viewControllers)")
-        coordinator.goToDetails()
-      //  print("TAP")
-      //  let vc = DetailsViewController(item: itemsInCollection[indexPath.row])
-        //navigationController?.pushViewController(vc, animated: true)
+        guard let coordinator else { return }
+        let writeOff = itemsWriteOff.filter { $0.name == itemsInCollection[indexPath.row].details.commercialName }
+        print("writeOff: \(writeOff)")
+        coordinator.goToDetails(item: itemsInCollection[indexPath.row], writeOff: writeOff )
     }
 }
 
@@ -146,13 +126,13 @@ extension MainViewController: UITextFieldDelegate {
 
     func textFieldDidChangeSelection(_ textField: UITextField) {
         
-//        if textField.text != "" {
-//            filter(selectedChars: selectedChars, selectedNumbers: selectedNumbers)
-            //itemsInCollection = itemsInCollection.filter { $0.name.lowercased().contains(textField.text!.lowercased()) }
+        if textField.text != "" {
+            filter(selectedChars: selectedChars, selectedNumbers: selectedNumbers)
+            itemsInCollection = itemsInCollection.filter { $0.details.commercialName.lowercased().contains(textField.text!.lowercased()) }
             mainView.collectionView.reloadData()
-//        } else {
-//            filter(selectedChars: selectedChars, selectedNumbers: selectedNumbers)
-//        }
+        } else {
+            filter(selectedChars: selectedChars, selectedNumbers: selectedNumbers)
+        }
     }
 }
 
@@ -179,12 +159,11 @@ extension MainViewController {
                     comment = obj[10]
                 }
                 items.append(Item(id: UUID(),
-                                  details: Details(commercialName: name),
+                                  details: Details(commercialName: name, technicalName: actualName, discription: comment),
                                   pricing: Pricing(price: price, totalPrice: totalPrice),
-                                  stock: StockInfo(totalQuantity: quantity, Unit: unit),
+                                  stock: StockInfo(totalQuantity: quantity, unit: unit),
                                   location: Rack(section: charRack, number: numberRack),
                                   createdAt: Date()))
-             //   items.append(Item(name: name, actualName: actualName, price: price, totalPrice: totalPrice, quantity: quantity, unit: unit, imageURL: nil, charRack: charRack, numberRack: numberRack, row: nil, comment: comment))
             }
         }
     }
@@ -192,23 +171,29 @@ extension MainViewController {
     private func writeCountAdd(_ objects: GoogleSheetResponse) {
         for i in 2..<objects.values.count {
             guard objects.values[i].indices.contains(0),
+                  objects.values[i].indices.contains(1),
                   objects.values[i].indices.contains(2),
+                  objects.values[i].indices.contains(3),
+                  objects.values[i].indices.contains(4),
                   objects.values[i].indices.contains(5)
+
             else {
                 print("Ошибка: неверный формат данных в строке \(i)")
                 continue
             }
             
             let name = objects.values[i][0]
-            let status = objects.values[i][5]
-            
+            let unit = objects.values[i][1]
             let countString = objects.values[i][2]
                 .replacingOccurrences(of: ",", with: ".")
                 .replacingOccurrences(of: " ", with: "")
-            
             let count = Double(countString) ?? 0.0
+            let author = objects.values[i][3]
+            let project = objects.values[i][4]
+            let status = objects.values[i][5]
             
-            // let count = Double(objects.values[i][2].replacingOccurrences(of: ",", with: ".").replacingOccurrences(of: "\\s", with: "")) ?? 0.0
+            itemsWriteOff.append(ItemWriteOff(id: i, name: name, quantity: count, unit: unit, author: author, project: project, status: status))
+            
             if let index = self.items.firstIndex(where: {
                 $0.details.commercialName == name || $0.details.commercialName.dropFirst(3) == name
             }) {
@@ -297,27 +282,27 @@ extension MainViewController {
     //    }
     //}
     
-//extension MainViewController: FilterDelegate {
-//    func setRactFilter(selectedChars: Set<String>, selectedNumbers: Set<String>) {
-//        self.selectedChars = selectedChars
-//        self.selectedNumbers = selectedNumbers
-//    }
-//    
-//        func filter(selectedChars: Set<String>, selectedNumbers: Set<String>) {
-//            if selectedChars.isEmpty && selectedNumbers.isEmpty {
-//                itemsInCollection = items
-//                mainView.collectionView.reloadData()
-//                return
-//            }
-//            
-//           // itemsInCollection = items.filter { item in
-//                
-//             //   let charFilter = selectedChars.isEmpty || selectedChars.contains(item.charRack)
-//                
-//            //    let numberFilter = selectedNumbers.isEmpty || selectedNumbers.contains(item.numberRack)
-//                
-//              //  return charFilter && numberFilter
-//          ///  }
-//            mainView.collectionView.reloadData()
-//        }
-//}
+extension MainViewController: FilterDelegate {
+    func setRactFilter(selectedChars: Set<String>, selectedNumbers: Set<String>) {
+        self.selectedChars = selectedChars
+        self.selectedNumbers = selectedNumbers
+    }
+    
+    func filter(selectedChars: Set<String>, selectedNumbers: Set<String>) {
+        if selectedChars.isEmpty && selectedNumbers.isEmpty {
+            itemsInCollection = items
+            mainView.collectionView.reloadData()
+            return
+        }
+        
+        itemsInCollection = items.filter { item in
+            
+            let charFilter = selectedChars.isEmpty || selectedChars.contains(item.location.section)
+            
+            let numberFilter = selectedNumbers.isEmpty || selectedNumbers.contains(item.location.number)
+            
+            return charFilter && numberFilter
+        }
+        mainView.collectionView.reloadData()
+    }
+}
