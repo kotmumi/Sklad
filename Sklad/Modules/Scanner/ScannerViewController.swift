@@ -182,7 +182,7 @@ class ScannerViewController: UIViewController {
     }
     
     private func handleScannedCode(_ code: String) {
-        guard let item = items.first(where: { $0.details.commercialName == code }) else {
+        guard items.first(where: { $0.details.commercialName == code }) != nil else {
             showNotFoundAlert()
             return
         }
