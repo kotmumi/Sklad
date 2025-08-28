@@ -1,308 +1,290 @@
 //
-//  ViewController.swift
+//  MainViewController.swift
 //  Sklad
 //
-//  Created by Кирилл Котыло on 29.07.25.
+//  Created by Кирилл Котыло on 26.08.25.
 //
-
 import UIKit
-import GoogleSignIn
+import CoreData
+import Combine
 
 class MainViewController: UIViewController {
     
     weak var coordinator: MainCoordinator?
-    private var objects: GoogleSheetResponse?
-    private var writeObjects: GoogleSheetResponse?
-    private let googleSheetsManager: GoogleSheetsService = GoogleSheetsDataService()
-    
-    private var items: [Item] = []
-    private var itemsInCollection = [Item]()
-    
-    private var itemsWriteOff: [ItemWriteOff] = []
-    
-    private var selectedChars = Set<String>()
-    private var selectedNumbers = Set<String>()
-   
+    private let viewModel: MainViewModel
     private let mainView = MainView()
-    let refreshControl = UIRefreshControl()
+    private let refreshControl = UIRefreshControl()
+    
+    private var fetchedResultsController: NSFetchedResultsController<ItemEntity>!
+    private var diffableDataSource: UICollectionViewDiffableDataSource<Int, NSManagedObjectID>?
+    
+    var cancellables = Set<AnyCancellable>()
+    
+    init(viewModel: MainViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func loadView() {
         view = mainView
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         tabBarController?.isTabBarHidden = false
     }
     
     override func viewDidLoad() {
-        
         super.viewDidLoad()
         setupUI()
+        setupFetchedResultsController()
+        setupDiffableDataSource()
+        bindViewModel()
+        
         Task {
-            print("will fetchData")
-            try await fetchData()
-            print("did fetchData")
+            await viewModel.loadData()
         }
-    }
-    
-    private func fetchData() async throws {
-        objects = try await googleSheetsManager.fetchData(spreadsheetId: Spreadsheet.StorageSheet.id, range: Spreadsheet.StorageSheet.storageList)
-        guard let objects else {return}
-        itemsAdd(objects)
-        
-        writeObjects = try await googleSheetsManager.fetchData(spreadsheetId: Spreadsheet.WriteOffSheet.id,range: Spreadsheet.WriteOffSheet.writeOffList())
-        guard let obj = writeObjects else {return}
-        writeCountAdd(obj)
-        
-        itemsInCollection = items
-        
-        mainView.collectionView.reloadData()
     }
     
     private func setupUI() {
         
         navigationItem.searchController?.searchBar.delegate = self
-        navigationItem.searchController?.searchBar.searchTextField.delegate = self
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
-        
+        mainView.collectionView.register(ProductCellView.self,
+                                           forCellWithReuseIdentifier: ProductCellView.identifier)
         mainView.collectionView.delegate = self
-        mainView.collectionView.dataSource = self
-       
-        mainView.collectionView.register(ProductCellView.self, forCellWithReuseIdentifier: ProductCellView.identifier)
-        
         mainView.collectionView.refreshControl = refreshControl
-        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
+        //refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
+        refreshControl.addAction(UIAction { [weak self] _ in
+            guard let self else {return}
+            self.refreshData()
+        }, for: .valueChanged)
+        mainView.filterButton.addTarget(self, action: #selector(tapFilterButton), for: .touchUpInside)
+    }
+    
+    private func setupFetchedResultsController() {
+        let fetchRequest: NSFetchRequest<ItemEntity> = ItemEntity.fetchRequest()
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "commercialName", ascending: true)]
         
-        guard let navControll =  navigationController as? CustomNavigationController else {return}
-        navControll.filterButton.addTarget(self, action: #selector(tapFilterButton), for: .touchUpInside)
-    }
-
-    @objc
-    private func tapFilterButton() {
-        coordinator?.goToFilter(selectedCharRacts: selectedChars, selectedNumberRacts: selectedNumbers)
-    }
-    
-    @objc
-    private func refreshData() async throws {
-            try await fetchData()
-            refreshControl.endRefreshing()
-    }
-}
-
-extension MainViewController: UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        itemsInCollection.count
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ProductCellView.identifier, for: indexPath) as? ProductCellView else {
-            return UICollectionViewCell()
-        }
-        cell.config(whit: itemsInCollection[indexPath.row])
-        return cell
-    }
-}
-
-extension MainViewController: UICollectionViewDelegateFlowLayout {
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let width = (collectionView.bounds.width - 44) / 2
-        return CGSize(width: width, height: width)
-    }
-
-}
-
-extension MainViewController: UICollectionViewDelegate {
-    
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        guard let coordinator else { return }
-        let writeOff = itemsWriteOff.filter { $0.name == itemsInCollection[indexPath.row].details.commercialName }
-        print("writeOff: \(writeOff)")
-        coordinator.goToDetails(item: itemsInCollection[indexPath.row], writeOff: writeOff )
-    }
-}
-
-extension MainViewController: UITextFieldDelegate {
-
-    func textFieldDidChangeSelection(_ textField: UITextField) {
-        
-        if textField.text != "" {
-            filter(selectedChars: selectedChars, selectedNumbers: selectedNumbers)
-            itemsInCollection = itemsInCollection.filter { $0.details.commercialName.lowercased().contains(textField.text!.lowercased()) }
-            mainView.collectionView.reloadData()
-        } else {
-            filter(selectedChars: selectedChars, selectedNumbers: selectedNumbers)
-        }
-    }
-}
-
-extension MainViewController {
-    
-    private func itemsAdd(_ objects: GoogleSheetResponse) {
-        items.removeAll()
-        for obj in objects.values {
-            if obj.count > 9 && obj != objects.values.first {
-                let name = obj[1]
-                let actualName = obj[2]
-                let unit = obj[3]
-                let stringCount = obj[4].replacingOccurrences(of: ",", with: ".")
-                guard let quantity = Double(stringCount.replacingOccurrences(of: "\\s", with: "",options: .regularExpression)) else {
-                    continue
-                }
-                let price = obj[5]
-                let totalPrice = obj[6]
-                _ = "\(obj[8]) \(obj[9])"
-                let charRack = obj[8]
-                let numberRack = obj[9]
-                var comment: String?
-                do {
-                    comment = obj[10]
-                }
-                items.append(Item(id: UUID(),
-                                  details: Details(commercialName: name, technicalName: actualName, discription: comment),
-                                  pricing: Pricing(price: price, totalPrice: totalPrice),
-                                  stock: StockInfo(totalQuantity: quantity, unit: unit),
-                                  location: Rack(section: charRack, number: numberRack),
-                                  createdAt: Date()))
-            }
-        }
-    }
-    
-    private func writeCountAdd(_ objects: GoogleSheetResponse) {
-        for i in 2..<objects.values.count {
-            guard objects.values[i].indices.contains(0),
-                  objects.values[i].indices.contains(1),
-                  objects.values[i].indices.contains(2),
-                  objects.values[i].indices.contains(3),
-                  objects.values[i].indices.contains(4),
-                  objects.values[i].indices.contains(5)
-
-            else {
-                print("Ошибка: неверный формат данных в строке \(i)")
-                continue
-            }
-            
-            let name = objects.values[i][0]
-            let unit = objects.values[i][1]
-            let countString = objects.values[i][2]
-                .replacingOccurrences(of: ",", with: ".")
-                .replacingOccurrences(of: " ", with: "")
-            let count = Double(countString) ?? 0.0
-            let author = objects.values[i][3]
-            let project = objects.values[i][4]
-            let status = objects.values[i][5]
-            
-            itemsWriteOff.append(ItemWriteOff(id: i, name: name, quantity: count, unit: unit, author: author, project: project, status: status))
-            
-            if let index = self.items.firstIndex(where: {
-                $0.details.commercialName == name || $0.details.commercialName.dropFirst(3) == name
-            }) {
-                if status == "Взял на тесты" {
-                    self.items[index].stock.testedQuantity += count
-                } else {
-                    self.items[index].stock.allocatedQuantity += count
-                }
-            }
-        }
-    }
-    
-    private func googleSignIn() {
-        let scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-        
-        GIDSignIn.sharedInstance.signIn(
-            withPresenting: self,
-            hint: nil,
-            additionalScopes: scopes
-        ) { result, error in
-            
-            if let error = error {
-                print("Error: \(error.localizedDescription)")
-                return
-            }
-            
-            guard let user = result?.user else { return }
-            let email = user.profile?.email ?? "No email"
-            print("Успешный вход пользователя: \(email)")
-        }
-    }
-    
-    private func showAuthError() {
-        let alert = UIAlertController(
-            title: "Требуется авторизация",
-            message: "Пожалуйста, войдите через Google",
-            preferredStyle: .alert
+        fetchedResultsController = NSFetchedResultsController(
+            fetchRequest: fetchRequest,
+            managedObjectContext: CoreDataManager.shared.viewContext,
+            sectionNameKeyPath: nil,
+            cacheName: nil
         )
-        alert.addAction(UIAlertAction(title: "Войти", style: .default) { _ in
-            // Запускаем процесс авторизации
-            self.googleSignIn()
-        })
-        present(alert, animated: true)
-    }
-    
-}
-    
-    
-    extension MainViewController: UISearchBarDelegate {
-        func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
-            guard let searchControll = self.navigationItem.searchController else {
-                return
-            }
-            guard let navigationController = self.navigationController as? CustomNavigationController else { return }
-            
-            navigationController.filterButton.isHidden = true
-            searchControll.searchBar.showsCancelButton = true
-            searchControll.searchBar.searchTextField.layer.borderColor = UIColor.black.cgColor
-            DispatchQueue.main.async() {
-                searchControll.searchBar.becomeFirstResponder()
-            }
-             navigationController.navigationItem.hidesBackButton = true
-//            let vc = SearchViewController(search: searchControll)
-//            vc.navigationItem.hidesBackButton = true
-//            vc.searchDelegate = self
-//              navigationController.pushViewController(vc, animated: false)
-        }
         
-        func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-            
-            guard let navigationController = self.navigationController as? CustomNavigationController else { return }
-            
-            guard let searchControll = self.navigationItem.searchController else {
-                return
-            }
-            searchControll.searchBar.searchTextField.layer.borderColor = UIColor.lightGray.cgColor
-            searchControll.searchBar.showsCancelButton = false
-            navigationController.filterButton.isHidden = false
-        }
+        fetchedResultsController.delegate = self
         
+        do {
+            try fetchedResultsController.performFetch()
+        } catch {
+            print("Failed to initialize FetchedResultsController: \(error)")
+        }
     }
     
-    //extension MainViewController: MainViewControllerDelegate {
-    //    func didSelectSearch() {
-    //        self.navigationItem.searchController?.searchBar.showsCancelButton = false
-    //    }
-    //}
-    
-extension MainViewController: FilterDelegate {
-    func setRactFilter(selectedChars: Set<String>, selectedNumbers: Set<String>) {
-        self.selectedChars = selectedChars
-        self.selectedNumbers = selectedNumbers
+    private func setupDiffableDataSource() {
+        diffableDataSource = UICollectionViewDiffableDataSource<Int, NSManagedObjectID>(
+            collectionView: mainView.collectionView
+        ) { [weak self] collectionView, indexPath, objectID in
+            
+            guard self != nil else { return UICollectionViewCell() }
+            
+            let context = CoreDataManager.shared.viewContext
+            guard let object = try? context.existingObject(with: objectID),
+                  let itemEntity = object as? ItemEntity,
+                  let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: ProductCellView.identifier,
+                    for: indexPath
+                  ) as? ProductCellView else {
+                return UICollectionViewCell()
+            }
+            let item = Item(from: itemEntity)
+            cell.config(whit: item)
+            
+            return cell
+        }
+        applySnapshot()
     }
     
-    func filter(selectedChars: Set<String>, selectedNumbers: Set<String>) {
-        if selectedChars.isEmpty && selectedNumbers.isEmpty {
-            itemsInCollection = items
-            mainView.collectionView.reloadData()
+    private func bindViewModel() {
+        viewModel.$isLoading
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                if !isLoading {
+                    self?.refreshControl.endRefreshing()
+                }
+            }
+            .store(in: &cancellables)
+        
+        viewModel.$errorMessage
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] errorMessage in
+                if let errorMessage = errorMessage {
+                    self?.showErrorAlert(message: errorMessage)
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    @objc private func tapFilterButton() {
+        coordinator?.goToFilter(selectedCharRacts: viewModel.selectedChars,
+                               selectedNumberRacts: viewModel.selectedNumbers)
+    }
+    
+    private func refreshData() {
+        Task {
+            await viewModel.refreshData()
+            await MainActor.run {
+                self.refreshControl.endRefreshing()
+            }
+        }
+    }
+    
+    private func applySnapshot(animatingDifferences: Bool = true) {
+        guard let dataSource = diffableDataSource,
+              let fetchedObjects = fetchedResultsController.fetchedObjects else {
             return
         }
         
-        itemsInCollection = items.filter { item in
-            
-            let charFilter = selectedChars.isEmpty || selectedChars.contains(item.location.section)
-            
-            let numberFilter = selectedNumbers.isEmpty || selectedNumbers.contains(item.location.number)
-            
-            return charFilter && numberFilter
+        var snapshot = NSDiffableDataSourceSnapshot<Int, NSManagedObjectID>()
+        snapshot.appendSections([0])
+        
+        let objectIDs = fetchedObjects.map { $0.objectID }
+        snapshot.appendItems(objectIDs)
+        
+        dataSource.apply(snapshot, animatingDifferences: animatingDifferences)
+    }
+    
+    private func showErrorAlert(message: String) {
+        let alert = UIAlertController(
+            title: "Ошибка",
+            message: message,
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+}
+
+// MARK: - NSFetchedResultsControllerDelegate
+extension MainViewController: NSFetchedResultsControllerDelegate {
+    
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        applySnapshot()
+    }
+}
+
+// MARK: - UICollectionViewDelegate
+extension MainViewController: UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let objectID = diffableDataSource?.itemIdentifier(for: indexPath),
+              let context = try? CoreDataManager.shared.viewContext.existingObject(with: objectID),
+              let itemEntity = context as? ItemEntity else {
+            return
         }
-        mainView.collectionView.reloadData()
+        
+        let item = Item(from: itemEntity)
+        let writeOff = viewModel.getWriteOffs(for: item.details.commercialName)
+        
+        coordinator?.goToDetails(item: item, writeOff: writeOff)
+    }
+}
+
+// MARK: - UICollectionViewDelegateFlowLayout
+extension MainViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView,
+                       layout collectionViewLayout: UICollectionViewLayout,
+                       sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let width = (collectionView.bounds.width - 44) / 2
+        return CGSize(width: width, height: width)
+    }
+}
+
+// MARK: - UISearchBarDelegate
+extension MainViewController: UISearchBarDelegate {
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        guard let searchController = navigationItem.searchController,
+              let navController = navigationController as? CustomNavigationController else {
+            return
+        }
+        
+        navController.filterButton.isHidden = true
+        searchController.searchBar.showsCancelButton = true
+        searchController.searchBar.searchTextField.layer.borderColor = UIColor.black.cgColor
+        searchController.searchBar.becomeFirstResponder()
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        guard let navController = navigationController as? CustomNavigationController,
+              let searchController = navigationItem.searchController else {
+            return
+        }
+        
+        searchController.searchBar.searchTextField.layer.borderColor = UIColor.lightGray.cgColor
+        searchController.searchBar.showsCancelButton = false
+        navController.filterButton.isHidden = false
+        searchController.searchBar.resignFirstResponder()
+        
+        viewModel.clearSearch()
+        fetchedResultsController.fetchRequest.predicate = nil
+        try? fetchedResultsController.performFetch()
+        applySnapshot()
+    }
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        if searchText.isEmpty {
+            fetchedResultsController.fetchRequest.predicate = nil
+        } else {
+            fetchedResultsController.fetchRequest.predicate = NSPredicate(
+                format: "commercialName CONTAINS[cd] %@", searchText
+            )
+        }
+        
+        try? fetchedResultsController.performFetch()
+        applySnapshot()
+    }
+}
+
+// MARK: - FilterDelegate
+extension MainViewController: FilterDelegate {
+    func setRactFilter(selectedChars: Set<String>, selectedNumbers: Set<String>) {
+        viewModel.setRackFilter(selectedChars: selectedChars, selectedNumbers: selectedNumbers)
+        applyFilterPredicate()
+    }
+    
+    func filter(selectedChars: Set<String>, selectedNumbers: Set<String>) {
+        viewModel.setRackFilter(selectedChars: selectedChars, selectedNumbers: selectedNumbers)
+        applyFilterPredicate()
+    }
+    
+    private func applyFilterPredicate() {
+        let charPredicate: NSPredicate?
+        if !viewModel.selectedChars.isEmpty {
+            charPredicate = NSPredicate(format: "section IN %@", Array(viewModel.selectedChars))
+        } else {
+            charPredicate = nil
+        }
+        
+        let numberPredicate: NSPredicate?
+        if !viewModel.selectedNumbers.isEmpty {
+            numberPredicate = NSPredicate(format: "number IN %@", Array(viewModel.selectedNumbers))
+        } else {
+            numberPredicate = nil
+        }
+        
+        let finalPredicate: NSPredicate?
+        if let charPredicate = charPredicate, let numberPredicate = numberPredicate {
+            finalPredicate = NSCompoundPredicate(andPredicateWithSubpredicates: [charPredicate, numberPredicate])
+        } else {
+            finalPredicate = charPredicate ?? numberPredicate
+        }
+        
+        fetchedResultsController.fetchRequest.predicate = finalPredicate
+        try? fetchedResultsController.performFetch()
+        applySnapshot()
     }
 }

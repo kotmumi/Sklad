@@ -12,6 +12,7 @@ final class MainCoordinator: Coordinator {
     var childCoordinators: [Coordinator] = []
     weak var parentCoordinator: (any Coordinator)?
     var navigationController: UINavigationController
+    var mainViewModel: MainViewModel?
     
     var tabBarController: MainTabBarController?
   
@@ -21,9 +22,10 @@ final class MainCoordinator: Coordinator {
     }
     
     func start() {
-        let mainVC = MainViewController()
+        guard let mainViewModel else {return}
+        let mainVC = MainViewController(viewModel: mainViewModel)
             mainVC.coordinator = self
-            navigationController.setViewControllers([mainVC], animated: false)
+        navigationController.viewControllers = [mainVC]
         print(navigationController.viewControllers)
     }
   

@@ -9,69 +9,92 @@ import Combine
 import Foundation
 
 final class MainViewModel {
-    // MARK: Output
+    
+    var selectedChars = Set<String>()
+    var selectedNumbers = Set<String>()
+
     @Published var items: [Item] = []
     @Published var isLoading: Bool = false
-    @Published var errorMassage: String?
+    @Published var errorMessage: String?
     
-    // MARK: Dependencies
-    private let googleSheetManager: GoogleSheetsDataFetching
+    private let googleSheetsManager: GoogleSheetsDataFetching
+    private let coreDataService: CoreDataServiceProtocol
     private let coordinator: MainCoordinator
     
-    // MARK: Pagination
-    private var currentPage = 0
-    private var itemsPerPage = 50
-    private var hasMoreData = true
-    
-    init(googleSheetManager: GoogleSheetsDataFetching, coordinator: MainCoordinator) {
-        self.googleSheetManager = googleSheetManager
+    init(googleSheetsManager: GoogleSheetsDataFetching,
+         coreDataService: CoreDataServiceProtocol,
+         coordinator: MainCoordinator) {
+        self.googleSheetsManager = googleSheetsManager
+        self.coreDataService = coreDataService
         self.coordinator = coordinator
     }
     
     @MainActor
-    func loadInitialData() async {
+    func loadData() async {
         guard !isLoading else { return }
-        
         isLoading = true
         
-        defer { isLoading = false }
+        showCachedData()
         
         do {
-            let response = try await googleSheetManager.fetchData(spreadsheetId: Spreadsheet.StorageSheet.id, range: Spreadsheet.StorageSheet.storageList, limit: itemsPerPage, offset: 0)
-            
-            currentPage = 1
-            let newItems = processResponse(response)
-            items.append(contentsOf: newItems)
-            hasMoreData = newItems.count >= itemsPerPage
+            let networkItems = try await fetchFromNetwork()
+            await coreDataService.saveItems(networkItems)
+            showCachedData()
+            errorMessage = nil
         } catch {
-            errorMassage = "Ошибка загрузки \(error.localizedDescription)"
+            errorMessage = "Не удалось обновить данные. Работаем в офлайн-режиме."
         }
+        isLoading = false
+       // CoreDataManager.shared.printAllItems()
     }
     
     @MainActor
-    func loadNextPageIfNeeded() async {
-        guard !isLoading && hasMoreData else { return }
-        
-        isLoading = true
-        defer { isLoading = false }
-        do {
-            let response = try await googleSheetManager.fetchData(spreadsheetId: Spreadsheet.StorageSheet.id, range: Spreadsheet.StorageSheet.storageList, limit: itemsPerPage, offset: itemsPerPage * currentPage)
-            
-            currentPage += 1
-            let newItems = processResponse(response)
-            items.append(contentsOf: newItems)
-            hasMoreData = newItems.count >= itemsPerPage
-        } catch {
-            errorMassage = "Ошибка загрузки \(error.localizedDescription)"
+    func refreshData() async {
+        await loadData()
+    }
+
+    func setRackFilter(selectedChars: Set<String>, selectedNumbers: Set<String>) {
+        self.selectedChars = selectedChars
+        self.selectedNumbers = selectedNumbers
+    }
+    
+    func clearSearch() {
+    }
+    
+    func getWriteOffs(for itemName: String) -> [ItemWriteOff] {
+        return []
+    }
+    
+    private func showCachedData() {
+        let cachedEntities = coreDataService.fetchAllItems()
+        items = cachedEntities.map { entity in
+            Item(from: entity)
         }
     }
     
-    // MARK: - Private Methods
-       private func processResponse(_ response: GoogleSheetResponse) -> [Item] {
+    private func fetchFromNetwork() async throws -> [Item] {
+        
+        let objects = try await googleSheetsManager.fetchData(
+            spreadsheetId: Spreadsheet.StorageSheet.id,
+            range: Spreadsheet.StorageSheet.storageList
+        )
+        return processResponse(objects)
+    }
+    
+//    private func fetchFromNetworkPagination() async throws -> [Item] {
+//        
+//        let objects = try await googleSheetsManager.fetchData(
+//            spreadsheetId: Spreadsheet.StorageSheet.id,
+//            range: Spreadsheet.StorageSheet.storageList
+//        )
+//        return processResponse(objects)
+//    }
+    
+    private func processResponse(_ response: GoogleSheetResponse) -> [Item] {
            var processedItems: [Item] = []
            
            for (index, obj) in response.values.enumerated() {
-               guard obj.count > 9, index > 0 else { continue } // Пропускаем заголовок
+               guard obj.count > 9, index > 0 else { continue }
                
                let name = obj[1]
                let actualName = obj[2]
@@ -82,17 +105,23 @@ final class MainViewModel {
                }
                
                let item = Item(
-                   id: UUID(),
-                   details: Details(commercialName: name, technicalName: actualName, discription: obj.count > 10 ? obj[10] : nil),
-                   pricing: Pricing(price: obj[5], totalPrice: obj[6]),
-                   stock: StockInfo(totalQuantity: quantity, unit: unit),
-                   location: Rack(section: obj[8], number: obj[9]),
-                   createdAt: Date()
+                   details: Details(commercialName: name,
+                                    technicalName: actualName,
+                                    discription: obj.count > 10 ? obj[10] : nil
+                                   ),
+                   pricing: Pricing(price: obj[5],
+                                    totalPrice: obj[6]
+                                   ),
+                   stock: StockInfo(totalQuantity: quantity,
+                                    unit: unit
+                                   ),
+                   location: Rack(section: obj[8],
+                                  number: obj[9]
+                                 )
                )
                
                processedItems.append(item)
            }
-           
            return processedItems
        }
 }

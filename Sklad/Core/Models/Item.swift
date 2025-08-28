@@ -14,6 +14,23 @@ struct Item: Identifiable {
     var stock: StockInfo
     var location: Rack
     let createdAt: Date
+    
+    init(from item: ItemEntity) {
+        self.id = UUID()
+        self.details = .init(commercialName: item.commercialName, technicalName: item.technicalName, discription: item.discription)
+        self.pricing = .init(price: item.price ?? "", totalPrice: item.totalPrice ?? "")
+        self.stock = .init(totalQuantity: item.quantity, unit: item.unit)
+        self.location = .init(section: item.section ?? "", number: item.number ?? "")
+        self.createdAt = Date()
+    }
+    init(details: Details, pricing: Pricing, stock: StockInfo, location: Rack) {
+        self.id = UUID()
+        self.details = details
+        self.pricing = pricing
+        self.stock = stock
+        self.location = location
+        self.createdAt = Date()
+    }
 }
 
 

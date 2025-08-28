@@ -2,7 +2,7 @@
 //  ItemEntity+CoreDataProperties.swift
 //  Sklad
 //
-//  Created by Кирилл Котыло on 26.08.25.
+//  Created by Кирилл Котыло on 27.08.25.
 //
 //
 
@@ -16,15 +16,16 @@ extension ItemEntity {
         return NSFetchRequest<ItemEntity>(entityName: "ItemEntity")
     }
 
-    @NSManaged public var commercialName: String?
+    @NSManaged public var commercialName: String
     @NSManaged public var technicalName: String?
     @NSManaged public var quantity: Double
-    @NSManaged public var unit: String?
+    @NSManaged public var unit: String
     @NSManaged public var price: String?
     @NSManaged public var totalPrice: String?
     @NSManaged public var section: String?
     @NSManaged public var number: String?
     @NSManaged public var lastUpdated: Date?
+    @NSManaged public var discription: String?
 
 }
 

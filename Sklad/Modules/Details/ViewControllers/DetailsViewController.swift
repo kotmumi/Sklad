@@ -16,6 +16,8 @@ class DetailsViewController: UIViewController {
     lazy var tests: [ItemWriteOff] = writeOff.filter { $0.status == "Взял на тесты"}
     lazy var writeOffs: [ItemWriteOff] = writeOff.filter { $0.status == "На списание"}
     
+    private let rackView = RackView()
+    
     init(item: Item, writeOff: [ItemWriteOff]) {
         self.item = item
         self.writeOff = writeOff
@@ -36,13 +38,14 @@ class DetailsViewController: UIViewController {
     }
     
     private func setupUI() {
-        let appearance = UINavigationBarAppearance()
-        appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = .background
-        appearance.shadowColor = .clear
-        navigationController?.navigationBar.standardAppearance = appearance
-        navigationController?.navigationBar.scrollEdgeAppearance = appearance
+        guard let navController = navigationController as? CustomNavigationController else {
+            fatalError("Navigation controller must be MainNavigationController")
+        }
+        navController.isSearchBarHidden = true
         navigationItem.title = "Остатки"
+        rackView.config(rack: item.location.full)
+        let customBarButtonItem = UIBarButtonItem(customView: rackView)
+        navigationItem.rightBarButtonItem = customBarButtonItem
         
         detailsView.writeOffButton.addTarget(self, action: #selector(handleWriteOff), for: .touchUpInside)
         detailsView.segmentedControl.segmentedControl.addTarget(self, action: #selector(handleValueChanged), for: .valueChanged)

@@ -26,8 +26,9 @@ class DetailsCoordinator: Coordinator {
     func start() {
         let detailsVC = DetailsViewController(item: item, writeOff: writeOff)
         detailsVC.coordinator = self
+        
         navigationController.tabBarController?.isTabBarHidden = true
-        self.navigationController.pushViewController(detailsVC, animated: true)
+        navigationController.pushViewController(detailsVC, animated: true)
     }
     
     deinit {
