@@ -20,8 +20,8 @@ final class CoreDataManager {
             }
         }
 
-        // 3. (ОПЦИОНАЛЬНО) Автоматически сливаем изменения из viewContext в store
-        viewContext.automaticallyMergesChangesFromParent = true
+        //(Проверить потом) Автоматически сливаем изменения из viewContext в store 
+     //   viewContext.automaticallyMergesChangesFromParent = true
     }
 
     func saveContext() {

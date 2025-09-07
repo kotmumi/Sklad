@@ -46,7 +46,11 @@ class FilterViewController: UIViewController {
     }
     
     private func setupUI() {
-        tabBarController?.isTabBarHidden = true
+
+        guard let navController = navigationController as? CustomNavigationController else {
+            fatalError("Navigation controller must be MainNavigationController")
+        }
+        navController.isSearchBarHidden = true
         navigationItem.title = "Фильтр"
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(cancel))
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Сбросить", style: .plain, target: self, action: #selector(cancel))
@@ -54,6 +58,9 @@ class FilterViewController: UIViewController {
         filterView.RactsCharCollectionView.delegate = self
         filterView.RactsCharCollectionView.dataSource = self
         filterView.RactsCharCollectionView.register(FilterCell.self, forCellWithReuseIdentifier: FilterCell.identifier)
+        filterView.RactsCharCollectionView.register(HeaderView.self,
+                                                   forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+                                                   withReuseIdentifier: "header")
         
         filterView.acceptButton.addTarget(self, action: #selector(tapAcceptButton), for: .touchUpInside)
     }
@@ -112,6 +119,28 @@ extension FilterViewController: UICollectionViewDelegateFlowLayout {
         }
         
     }
+    
+    func collectionView(_ collectionView: UICollectionView,
+                          viewForSupplementaryElementOfKind kind: String,
+                          at indexPath: IndexPath) -> UICollectionReusableView {
+           
+           if kind == UICollectionView.elementKindSectionHeader {
+               let header = collectionView.dequeueReusableSupplementaryView(
+                   ofKind: kind,
+                   withReuseIdentifier: "header",
+                   for: indexPath
+               ) as! HeaderView
+               switch indexPath.section {
+               case 0:
+                   header.configure(title: "Стеллаж")
+               default:
+                   header.configure(title: "Полка")
+               }
+               return header
+           }
+           
+           return UICollectionReusableView()
+       }
 }
 
 extension FilterViewController: UICollectionViewDelegate {
@@ -138,5 +167,3 @@ extension FilterViewController: UICollectionViewDelegate {
         }
     }
 }
-
-

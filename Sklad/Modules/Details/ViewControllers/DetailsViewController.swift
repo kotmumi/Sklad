@@ -8,15 +8,16 @@
 import UIKit
 
 class DetailsViewController: UIViewController {
+    var coordinator: DetailsCoordinator?
     
     private let detailsView: DetailsView = DetailsView()
-    var coordinator: DetailsCoordinator?
+    
     private let item: Item
     private let writeOff: [ItemWriteOff]
     lazy var tests: [ItemWriteOff] = writeOff.filter { $0.status == "Взял на тесты"}
     lazy var writeOffs: [ItemWriteOff] = writeOff.filter { $0.status == "На списание"}
     
-    private let rackView = RackView()
+   
     
     init(item: Item, writeOff: [ItemWriteOff]) {
         self.item = item
@@ -32,21 +33,23 @@ class DetailsViewController: UIViewController {
         super.loadView()
         view = detailsView
     }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        configNavigationBar()
+    }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        configNavigationBar()
+    }
+
+    
     private func setupUI() {
-        guard let navController = navigationController as? CustomNavigationController else {
-            fatalError("Navigation controller must be MainNavigationController")
-        }
-        navController.isSearchBarHidden = true
-        navigationItem.title = "Остатки"
-        rackView.config(rack: item.location.full)
-        let customBarButtonItem = UIBarButtonItem(customView: rackView)
-        navigationItem.rightBarButtonItem = customBarButtonItem
-        
         detailsView.writeOffButton.addTarget(self, action: #selector(handleWriteOff), for: .touchUpInside)
         detailsView.segmentedControl.segmentedControl.addTarget(self, action: #selector(handleValueChanged), for: .valueChanged)
         detailsView.tableView.dataSource = self
@@ -56,6 +59,22 @@ class DetailsViewController: UIViewController {
         detailsView.tableView.register(InfoViewCell.self, forCellReuseIdentifier: InfoViewCell.reuseIdentifier)
         detailsView.tableView.register(WriteOffViewCell.self, forCellReuseIdentifier: WriteOffViewCell.reuseIdentifier)
     }
+    
+    private func configNavigationBar() {
+        guard let navController = navigationController as? CustomNavigationController else {
+            fatalError("Navigation controller must be MainNavigationController")
+        }
+        navController.navigationBar.isHidden = false
+        navController.isSearchBarHidden = true
+        navigationItem.title = "Остатки"
+        
+        let rackView = RackView()
+        rackView.config(rack: item.location.full)
+        let customBarButtonItem = UIBarButtonItem(customView: rackView)
+        navigationItem.rightBarButtonItem = customBarButtonItem
+        
+    }
+    
     @objc
     private func handleValueChanged() {
         detailsView.tableView.reloadData()
@@ -107,7 +126,7 @@ extension DetailsViewController: UITableViewDataSource {
             headerCell.config(item: item)
             return headerCell
         case 1 where detailsView.segmentedControl.segmentedControl.selectedSegmentIndex == 0:
-            infoCell.config(item: item)
+            infoCell.config(item: item, writeOff: writeOff)
             return infoCell
         default:
             if detailsView.segmentedControl.segmentedControl.selectedSegmentIndex == 1 {
@@ -121,5 +140,7 @@ extension DetailsViewController: UITableViewDataSource {
 }
 
 extension DetailsViewController: UITableViewDelegate {
-    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
 }

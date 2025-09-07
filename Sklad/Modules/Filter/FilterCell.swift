@@ -67,6 +67,7 @@ class FilterCell: UICollectionViewCell {
         if isActive {
             isSelect = true
             _ = select()
+            frame.size.width += 8
         } else {
             isSelect = false
             backgroundColor = .white

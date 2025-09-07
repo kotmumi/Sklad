@@ -9,7 +9,15 @@ import UIKit
 
 final class WriteOffView: UIView {
     
-    private let projectPickerView = ProjectPickerView()
+    let projectPickerView = ProjectPickerView()
+    
+    let closeButton: UIButton = {
+        let button = UIButton(type: .custom)
+        button.setImage(UIImage(systemName: "xmark"), for: .normal)
+        button.tintColor = .systemBlue
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
     
     private let titleLabel: UILabel = {
         let label = UILabel()
@@ -52,11 +60,31 @@ final class WriteOffView: UIView {
     let countTextField: UITextField = {
         let textField = UITextField()
         textField.translatesAutoresizingMaskIntoConstraints = false
-        textField.borderStyle = .roundedRect
+        textField.layer.borderWidth = 1
+        textField.layer.borderColor = UIColor.lightGray.cgColor
         textField.text = "20 шт"
-        textField.rightView = UIImageView(image: UIImage(systemName: "pencil"))
+        
+        let iconContainer = UIView(frame: CGRect(x: 16, y: 0, width: 40, height: 30))
+        let imageView = UIImageView(image: UIImage(systemName: "pencil"))
+        imageView.tintColor = .gray
+        imageView.frame = CGRect(x: 8, y: 5, width: 20, height: 20)
+        imageView.contentMode = .scaleAspectFit
+
+        iconContainer.addSubview(imageView)
+        textField.rightView = iconContainer
         textField.rightViewMode = .always
+        
+        let leftPaddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))
+        textField.leftView = leftPaddingView
+        textField.leftViewMode = .always
+        
         return textField
+    }()
+    
+    let sliderCount: UISlider = {
+       let slider = UISlider()
+        slider.translatesAutoresizingMaskIntoConstraints = false
+        return slider
     }()
     
     private let appointmentLabel: UILabel = {
@@ -100,6 +128,44 @@ final class WriteOffView: UIView {
         return button
     }()
     
+    private let descriptionLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 14, weight: .regular)
+        label.textAlignment = .left
+        label.numberOfLines = 0
+        label.textColor = .systemGray
+        label.text = "Комментарий:"
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
+    
+    let descriptionTextField: UITextField = {
+        let textField = UITextField()
+        textField.translatesAutoresizingMaskIntoConstraints = false
+        textField.borderStyle = .roundedRect
+        textField.backgroundColor = .systemGray5
+        textField.tintColor = .systemGray
+        textField.placeholder = "Примечание(не обязательно)"
+        textField.layer.cornerRadius = 8
+        textField.layer.masksToBounds = true
+        
+        let iconContainer = UIView(frame: CGRect(x: 16, y: 0, width: 40, height: 30))
+        let imageView = UIImageView(image: UIImage(systemName: "pencil"))
+        imageView.tintColor = .gray
+        imageView.frame = CGRect(x: 8, y: 5, width: 20, height: 20)
+        imageView.contentMode = .scaleAspectFit
+
+        iconContainer.addSubview(imageView)
+        textField.rightView = iconContainer
+        textField.rightViewMode = .always
+        
+        let leftPaddingView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))
+        textField.leftView = leftPaddingView
+        textField.leftViewMode = .always
+        
+        return textField
+    }()
+    
     private let authorLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 14, weight: .regular)
@@ -133,40 +199,56 @@ final class WriteOffView: UIView {
     }
     
     private func setupUI() {
-        translatesAutoresizingMaskIntoConstraints = false
-        backgroundColor = .background
+        
+        backgroundColor = .white
+        
         addSubview(titleLabel)
+        addSubview(closeButton)
         addSubview(verticalStackView)
+        addSubview(writeOffButton)
+        
         verticalStackView.addArrangedSubview(separatorTop)
         verticalStackView.addArrangedSubview(countLabel)
         verticalStackView.addArrangedSubview(countTextField)
+        verticalStackView.addArrangedSubview(sliderCount)
         verticalStackView.addArrangedSubview(appointmentLabel)
         verticalStackView.addArrangedSubview(segmentedControl)
         verticalStackView.addArrangedSubview(projectLabel)
         verticalStackView.addArrangedSubview(projectPickerView)
+        verticalStackView.addArrangedSubview(descriptionLabel)
+        verticalStackView.addArrangedSubview(descriptionTextField)
         verticalStackView.addArrangedSubview(authorLabel)
         verticalStackView.addArrangedSubview(authorTextField)
-        addSubview(writeOffButton)
-        countTextField.layer.cornerRadius = 16
+        
+        countTextField.layer.cornerRadius = 25
     }
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
             
-            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 16),
+            titleLabel.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 32),
             titleLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+            
+            closeButton.centerYAnchor.constraint(equalTo: titleLabel.centerYAnchor),
+            closeButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            closeButton.heightAnchor.constraint(equalToConstant: 40),
+            closeButton.widthAnchor.constraint(equalTo: closeButton.heightAnchor),
             
             verticalStackView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 32),
             verticalStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
             verticalStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
             
-            countTextField.heightAnchor.constraint(equalToConstant: 32),
+            countTextField.heightAnchor.constraint(equalToConstant: 50),
             
             separatorTop.heightAnchor.constraint(equalToConstant: 1),
             separatorTop.widthAnchor.constraint(equalTo: verticalStackView.widthAnchor),
             
+            sliderCount.widthAnchor.constraint(equalTo: verticalStackView.widthAnchor),
+            
             segmentedControl.widthAnchor.constraint(equalTo: verticalStackView.widthAnchor),
             
+            descriptionTextField.widthAnchor.constraint(equalTo: verticalStackView.widthAnchor),
+            descriptionTextField.heightAnchor.constraint(equalToConstant: 50),
             
             writeOffButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
             writeOffButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),

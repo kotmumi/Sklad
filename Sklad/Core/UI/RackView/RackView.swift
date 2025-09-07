@@ -52,6 +52,6 @@ final class RackView: UIView {
     
     func config(rack: String) {
         rackNumberLabel.text = rack
-        
+        rackNumberLabel.backgroundColor = .clear
     }
 }

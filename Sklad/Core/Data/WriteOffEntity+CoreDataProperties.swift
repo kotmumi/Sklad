@@ -16,7 +16,7 @@ extension WriteOffEntity {
         return NSFetchRequest<WriteOffEntity>(entityName: "WriteOffEntity")
     }
 
-    @NSManaged public var id: UUID?
+    @NSManaged public var id: Int64
     @NSManaged public var itemName: String?
     @NSManaged public var quantity: Double
     @NSManaged public var unit: String?

@@ -16,17 +16,18 @@ final class MainCoordinator: Coordinator {
     
     var tabBarController: MainTabBarController?
   
-    init(navigationController: UINavigationController) {
+    init(navigationController: UINavigationController = UINavigationController()) {
         self.navigationController = navigationController
-        print(navigationController.viewControllers)
     }
     
     func start() {
-        guard let mainViewModel else {return}
-        let mainVC = MainViewController(viewModel: mainViewModel)
+        if navigationController.viewControllers.isEmpty {
+            guard let mainViewModel else {return}
+            let mainVC = MainViewController(viewModel: mainViewModel)
             mainVC.coordinator = self
-        navigationController.viewControllers = [mainVC]
-        print(navigationController.viewControllers)
+            guard let customNavigationController = navigationController as? CustomNavigationController else { return }
+            customNavigationController.viewControllers = [mainVC]
+        }
     }
   
     func goToFilter(selectedCharRacts: Set<String>, selectedNumberRacts: Set<String>) {
@@ -41,7 +42,7 @@ final class MainCoordinator: Coordinator {
     }
     
     func goToDetails(item: Item, writeOff: [ItemWriteOff]) {
-        let detailsCoordinator = DetailsCoordinator(navigationController: navigationController, item: item, writeOff: writeOff)
+        let detailsCoordinator = DetailsCoordinator(navigationController: navigationController , item: item, writeOff: writeOff)
         detailsCoordinator.parentCoordinator = self
         addChild(detailsCoordinator)
         detailsCoordinator.start()

@@ -1,13 +1,15 @@
 //
-//  ProjectPickerView.swift
+//  ProjectViewCell.swift
 //  Sklad
 //
-//  Created by Кирилл Котыло on 20.08.25.
+//  Created by Кирилл Котыло on 6.09.25.
 //
 
 import UIKit
 
-final class ProjectPickerView: UIView {
+final class ProjectViewCell: UITableViewCell {
+    
+    static let reuseIdentifier = "ProjectViewCell"
     
     private let projectNumberLabel: UILabel = {
         let label = UILabel()
@@ -24,7 +26,7 @@ final class ProjectPickerView: UIView {
         paragraphStyle.lineBreakMode = .byWordWrapping
 
         let attributedString = NSAttributedString(
-            string: "Сист.№(-)     ",
+            string: "Сист.№ (37023)     ",
             attributes: [
                 .paragraphStyle: paragraphStyle,
                 .font: UIFont.systemFont(ofSize: 12),
@@ -42,24 +44,15 @@ final class ProjectPickerView: UIView {
         label.textAlignment = .left
         label.numberOfLines = 0
         label.textColor = .black
-        label.text = "Выберите проект:"
+        label.text = "Транспортная система паллетайзера №3 (Упак. Машина Somic сист № 36957) ПФ Пинск"
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
-    private let chevronImage: UIImageView = {
-        let imageView = UIImageView(image: UIImage(systemName: "chevron.right"))
-        imageView.contentMode = .scaleAspectFit
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.tintColor = .lightGray
-        return imageView
-    }()
-    
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
         setupUI()
         setupConstraints()
-        
     }
     
     required init?(coder: NSCoder) {
@@ -67,13 +60,14 @@ final class ProjectPickerView: UIView {
     }
     
     private func setupUI() {
-        translatesAutoresizingMaskIntoConstraints = false
-        layer.cornerRadius = 8
+        //translatesAutoresizingMaskIntoConstraints = false
+        layer.cornerRadius = 20
         layer.borderWidth = 1
-        layer.borderColor = UIColor.systemGray.cgColor
+        layer.borderColor = UIColor.systemGray5.cgColor
+        layer.masksToBounds = true
+        clipsToBounds = true
         addSubview(projectNumberLabel)
         addSubview(projectNameLabel)
-        addSubview(chevronImage)
     }
     
     private func setupConstraints() {
@@ -87,9 +81,10 @@ final class ProjectPickerView: UIView {
             projectNameLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             projectNameLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             projectNameLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
-            
-            chevronImage.topAnchor.constraint(equalTo: topAnchor, constant: 16),
-            chevronImage.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
         ])
+    }
+    
+    func config(item: Item) {
+       
     }
 }

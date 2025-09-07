@@ -10,33 +10,97 @@ import GoogleSignIn
 
 class AccountView: UIView {
     
-    private let image: UIImageView = {
-        let image = UIImageView(image: UIImage(systemName: "person.crop.circle"))
-        image.translatesAutoresizingMaskIntoConstraints = false
-        image.contentMode = .scaleAspectFill
-        image.tintColor = .systemGray
-        return image
-    }()
+    let userProfileView = UserProfileView()
     
-    private let userNameLabel: UILabel = {
+    private let appLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Account"
+        label.text = "Sklad"
         label.textAlignment = .center
-        label.font = .systemFont(ofSize: 16, weight: .regular)
         label.textColor = .black
+        label.font = .systemFont(ofSize: 16, weight: .bold)
         return label
     }()
-    let signOutButton: UIButton = {
-       let button = UIButton(type: .system)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .regular)
-        button.setTitle("Выйти", for: .normal)
-        button.backgroundColor = .systemRed
-        button.layer.cornerRadius = 25
-        button.tintColor = .black
-        return button
+    
+    private let logoImage: UIImageView = {
+        let imageView = UIImageView(image: UIImage(named: "logo"))
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        imageView.contentMode = .scaleAspectFit
+        return imageView
     }()
+    
+    private let designerLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.textAlignment = .center
+        label.textColor = .systemGray
+        label.font = .systemFont(ofSize: 14, weight: .regular)
+        
+        let attributedText = NSMutableAttributedString(string: "Designer ")
+        
+        let italicText = NSAttributedString(
+            string: "Anton Liukevich",
+            attributes: [
+                .font: UIFont.italicSystemFont(ofSize: 14),
+            ]
+        )
+        attributedText.append(italicText)
+        
+        label.attributedText = attributedText
+        return label
+    }()
+    
+    private let developerLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.textAlignment = .center
+        label.textColor = .systemGray
+        label.font = .systemFont(ofSize: 14, weight: .regular)
+        
+        let attributedText = NSMutableAttributedString(string: "Developer ")
+        
+        let italicText = NSAttributedString(
+            string: "Kiryl Katyla",
+            attributes: [
+                .font: UIFont.italicSystemFont(ofSize: 14),
+            ]
+        )
+        attributedText.append(italicText)
+        
+        label.attributedText = attributedText
+        return label
+    }()
+    
+    private let yearrLabel: UILabel = {
+        let label = UILabel()
+        label.translatesAutoresizingMaskIntoConstraints = false
+        label.text = "\u{00A9} 2025"
+        label.textAlignment = .center
+        label.textColor = .systemGray
+        label.font = .systemFont(ofSize: 14, weight: .regular)
+        return label
+    }()
+    
+    private let hStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .horizontal
+        stack.spacing = 8
+        stack.alignment = .center
+        stack.distribution = .equalSpacing
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
+    
+    private let vStack: UIStackView = {
+        let stack = UIStackView()
+        stack.axis = .vertical
+        stack.spacing = 8
+        stack.alignment = .center
+        stack.distribution = .equalSpacing
+        stack.translatesAutoresizingMaskIntoConstraints = false
+        return stack
+    }()
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
@@ -49,34 +113,33 @@ class AccountView: UIView {
     
     private func setupUI() {
         backgroundColor = .white
-      
-        addSubview(userNameLabel)
-        addSubview(image)
-        addSubview(signOutButton)
+
+        addSubview(userProfileView)
+        addSubview(vStack)
+        hStack.addArrangedSubview(appLabel)
+        hStack.addArrangedSubview(logoImage)
+        vStack.addArrangedSubview(hStack)
+        vStack.addArrangedSubview(designerLabel)
+        vStack.addArrangedSubview(developerLabel)
+        vStack.addArrangedSubview(yearrLabel)
     }
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
             
-            userNameLabel.centerYAnchor.constraint(equalTo: safeAreaLayoutGuide.centerYAnchor),
-            userNameLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
-            userNameLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
-            userNameLabel.heightAnchor.constraint(equalToConstant: 44),
+            userProfileView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 16),
+            userProfileView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
+            userProfileView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+
+            vStack.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -32),
+            vStack.centerXAnchor.constraint(equalTo: centerXAnchor),
             
-            image.bottomAnchor.constraint(equalTo: userNameLabel.topAnchor, constant: -16),
-            image.centerXAnchor.constraint(equalTo: safeAreaLayoutGuide.centerXAnchor),
-            image.heightAnchor.constraint(equalTo: safeAreaLayoutGuide.heightAnchor, multiplier: 0.15),
-            image.widthAnchor.constraint(equalTo: image.heightAnchor),
-            
-            signOutButton.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -80),
-            signOutButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -48),
-            signOutButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 48),
-            signOutButton.heightAnchor.constraint(equalToConstant: 50),
-            
+            logoImage.heightAnchor.constraint(equalToConstant: 20),
+            logoImage.widthAnchor.constraint(equalToConstant: 20)
         ])
     }
     
     func config(user: GIDGoogleUser? = nil) {
-        userNameLabel.text = user?.profile?.name ?? "Anonym"
+        userProfileView.config(user: user)
     }
 }

@@ -37,6 +37,17 @@ class DetailsCoordinator: Coordinator {
     
     func goToWriteOff() {
         let writeOffVC = WriteOffViewController()
-        navigationController.present(writeOffVC, animated: true)
+        writeOffVC.coordinator = self
+        navigationController.pushViewController(writeOffVC, animated: true)
+    }
+    
+    func goToProjectView() {
+        let projectVC = ProjectViewController()
+        projectVC.coordinator = self
+        navigationController.present(projectVC, animated: true)
+    }
+    
+    func close() {
+        navigationController.popViewController(animated: true)
     }
 }

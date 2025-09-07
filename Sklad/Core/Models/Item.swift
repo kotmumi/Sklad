@@ -23,6 +23,7 @@ struct Item: Identifiable {
         self.location = .init(section: item.section ?? "", number: item.number ?? "")
         self.createdAt = Date()
     }
+    
     init(details: Details, pricing: Pricing, stock: StockInfo, location: Rack) {
         self.id = UUID()
         self.details = details

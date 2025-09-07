@@ -8,27 +8,30 @@
 import UIKit
 
 class CustomNavigationController: UINavigationController {
-    
-    let filterButton: UIButton = {
-        let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.backgroundColor = .white
-        button.setImage(UIImage(systemName: "slider.horizontal.3"), for: .normal)
-        button.tintColor = .black
-        button.layer.borderWidth = 1
-        button.layer.borderColor = UIColor.lightGray.cgColor
-        button.layer.cornerRadius = 25
-        return button
-    }()
-    
+
     let searchController: UISearchController = {
         let sc = UISearchController(searchResultsController: nil)
         sc.searchBar.placeholder = "Поиск по названию"
         sc.searchBar.searchTextField.backgroundColor = .white
-        sc.searchBar.searchTextField.layer.cornerRadius = 10
+        sc.searchBar.searchTextField.layer.cornerRadius = 25
         sc.searchBar.searchTextField.clipsToBounds = true
         return sc
     }()
+    
+    var trailingPadding: CGFloat = 16 {
+           didSet {
+               trailingConstraint?.constant = -trailingPadding
+               if trailingPadding == 16 {
+                   leadingConstraint?.constant = trailingPadding
+               }
+               UIView.animate(withDuration: 0.3) {
+                   self.view.layoutIfNeeded()
+               }
+           }
+       }
+    
+    private var trailingConstraint: NSLayoutConstraint?
+    private var leadingConstraint: NSLayoutConstraint?
     
     var isSearchBarHidden: Bool = false {
            didSet {
@@ -44,9 +47,8 @@ class CustomNavigationController: UINavigationController {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     private func setupNavigationBar() {
-        // 1. Настраиваем внешний вид navigationBar
         navigationBar.prefersLargeTitles = false
         navigationBar.tintColor = .black
         
@@ -58,13 +60,47 @@ class CustomNavigationController: UINavigationController {
         navigationBar.standardAppearance = appearance
         navigationBar.scrollEdgeAppearance = appearance
         
-        // 2. Добавляем searchController к текущему navigationItem
         topViewController?.navigationItem.searchController = searchController
         topViewController?.navigationItem.hidesSearchBarWhenScrolling = false
         
-        // 3. Добавляем кастомную кнопку в searchBar
-     //   setupSearchBarAppearance()
+        DispatchQueue.main.async {
+                    self.setupSearchBarAppearance()
+        }
+        
     }
+    
+    private func setupSearchBarAppearance() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
+             let searchTextField = self.searchController.searchBar.searchTextField
+             
+             searchTextField.backgroundColor = .white
+             searchTextField.layer.cornerRadius = 25
+             searchTextField.clipsToBounds = true
+             
+             searchTextField.translatesAutoresizingMaskIntoConstraints = false
+             
+            self.trailingConstraint = searchTextField.trailingAnchor.constraint(
+                        equalTo: self.navigationBar.trailingAnchor,
+                        constant: -self.trailingPadding
+                    )
+            
+            self.leadingConstraint = searchTextField.leadingAnchor.constraint(
+                equalTo: self.navigationBar.leadingAnchor,
+                constant: self.trailingPadding
+            )
+            
+             NSLayoutConstraint.activate([
+                 searchTextField.heightAnchor.constraint(equalToConstant: 50),
+                 searchTextField.widthAnchor.constraint(equalTo: self.searchController.searchBar.widthAnchor, constant: -32),
+                 self.leadingConstraint!,
+                 self.trailingConstraint!
+             ])
+             
+            self.searchController.searchBar.layoutIfNeeded()
+         }
+     }
+        
     
     private func updateSearchBarVisibility() {
            if isSearchBarHidden {
@@ -76,33 +112,8 @@ class CustomNavigationController: UINavigationController {
            }
        }
     
-//    private func setupSearchBarAppearance() {
-//        // Добавляем filterButton прямо в searchBar
-//        searchController.searchBar.addSubview(filterButton)
-//        
-//        NSLayoutConstraint.activate([
-//            filterButton.heightAnchor.constraint(equalToConstant: 50),
-//            filterButton.widthAnchor.constraint(equalToConstant: 50),
-//            filterButton.trailingAnchor.constraint(equalTo: searchController.searchBar.trailingAnchor, constant: -16),
-//            filterButton.centerYAnchor.constraint(equalTo: searchController.searchBar.centerYAnchor)
-//        ])
-    //}
-    
-    // Обновляем при смене ViewController'ов
-    override func pushViewController(_ viewController: UIViewController, animated: Bool) {
-        super.pushViewController(viewController, animated: animated)
-        updateSearchController(for: viewController)
-    }
-    
-    override func setViewControllers(_ viewControllers: [UIViewController], animated: Bool) {
-        super.setViewControllers(viewControllers, animated: animated)
-        if let topVC = viewControllers.last {
-            updateSearchController(for: topVC)
-        }
-    }
-    
     private func updateSearchController(for viewController: UIViewController) {
-        // Переносим searchController на новый ViewController
+        trailingPadding = 16
         viewController.navigationItem.searchController = searchController
         viewController.navigationItem.hidesSearchBarWhenScrolling = false
     }

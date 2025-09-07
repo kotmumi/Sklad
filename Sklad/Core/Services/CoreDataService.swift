@@ -43,6 +43,37 @@ final class CoreDataService: CoreDataServiceProtocol {
         }
     }
     
+    func saveWriteOff(_ items: [ItemWriteOff]) async {
+        let backgroundContext = CoreDataManager.shared.newBackgroundContext()
+        
+        await backgroundContext.perform {
+            for item in items {
+                let featchrequest: NSFetchRequest<WriteOffEntity> = WriteOffEntity.fetchRequest()
+                featchrequest.predicate = NSPredicate(format: "itemName == %@", item.name)
+                
+                let writeOffEntity: WriteOffEntity
+                if let existingItemEntity = try? backgroundContext.fetch(featchrequest).first {
+                    writeOffEntity = existingItemEntity
+                } else {
+                    writeOffEntity = WriteOffEntity(context: backgroundContext)
+                }
+                
+                writeOffEntity.itemName = item.name
+                writeOffEntity.id = Int64(item.id)
+                writeOffEntity.author = item.author
+                writeOffEntity.unit = item.unit
+                writeOffEntity.status = item.status
+                writeOffEntity.quantity = item.quantity
+                writeOffEntity.project = item.project
+            }
+            do {
+                try backgroundContext.save()
+            } catch {
+                print("Ошибка сохранения в CoreData: \(error)")
+            }
+        }
+    }
+    
     func fetchAllItems() -> [ItemEntity] {
         
         let context = CoreDataManager.shared.viewContext
@@ -58,6 +89,23 @@ final class CoreDataService: CoreDataServiceProtocol {
             return []
         }
     }
+    
+    func fetchAllWriteOffItems() -> [WriteOffEntity] {
+        
+        let context = CoreDataManager.shared.viewContext
+        
+        let featchRequest: NSFetchRequest<WriteOffEntity> = WriteOffEntity.fetchRequest()
+        
+        featchRequest.sortDescriptors = [NSSortDescriptor(key: "itemName", ascending: true)]
+
+        do {
+            return try context.fetch(featchRequest)
+        } catch {
+            print("Ошибка загрузки из CoreData: \(error)")
+            return []
+        }
+    }
+    
     
     func searchItems(query: String) -> [ItemEntity] {
         

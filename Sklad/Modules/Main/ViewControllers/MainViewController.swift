@@ -33,11 +33,7 @@ class MainViewController: UIViewController {
         view = mainView
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        tabBarController?.isTabBarHidden = false
-    }
-    
+  
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -50,15 +46,26 @@ class MainViewController: UIViewController {
         }
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        tabBarController?.isTabBarHidden = false
+        
+        guard let navController = navigationController as? CustomNavigationController else { return }
+            navController.trailingPadding = 16
+        navController.isSearchBarHidden = false
+    }
+    
+    
     private func setupUI() {
         
+        navigationController?.navigationBar.isHidden = false
         navigationItem.searchController?.searchBar.delegate = self
         navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
+    
         mainView.collectionView.register(ProductCellView.self,
                                            forCellWithReuseIdentifier: ProductCellView.identifier)
         mainView.collectionView.delegate = self
         mainView.collectionView.refreshControl = refreshControl
-        //refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
         refreshControl.addAction(UIAction { [weak self] _ in
             guard let self else {return}
             self.refreshData()
@@ -69,6 +76,7 @@ class MainViewController: UIViewController {
     private func setupFetchedResultsController() {
         let fetchRequest: NSFetchRequest<ItemEntity> = ItemEntity.fetchRequest()
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "commercialName", ascending: true)]
+        fetchRequest.fetchBatchSize = 50
         
         fetchedResultsController = NSFetchedResultsController(
             fetchRequest: fetchRequest,
@@ -189,7 +197,6 @@ extension MainViewController: UICollectionViewDelegate {
         
         let item = Item(from: itemEntity)
         let writeOff = viewModel.getWriteOffs(for: item.details.commercialName)
-        
         coordinator?.goToDetails(item: item, writeOff: writeOff)
     }
 }
@@ -212,10 +219,12 @@ extension MainViewController: UISearchBarDelegate {
             return
         }
         
-        navController.filterButton.isHidden = true
+        navController.trailingPadding = 80
+      //  navController.filterButton.isHidden = true
         searchController.searchBar.showsCancelButton = true
         searchController.searchBar.searchTextField.layer.borderColor = UIColor.black.cgColor
         searchController.searchBar.becomeFirstResponder()
+        
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
@@ -224,9 +233,10 @@ extension MainViewController: UISearchBarDelegate {
             return
         }
         
+        navController.trailingPadding = 16
+        
         searchController.searchBar.searchTextField.layer.borderColor = UIColor.lightGray.cgColor
         searchController.searchBar.showsCancelButton = false
-        navController.filterButton.isHidden = false
         searchController.searchBar.resignFirstResponder()
         
         viewModel.clearSearch()

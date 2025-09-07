@@ -27,6 +27,10 @@ class FilterView: UIView {
             layout.scrollDirection = .vertical
             layout.minimumLineSpacing = 8
             layout.minimumInteritemSpacing = 10
+            
+            layout.headerReferenceSize = CGSize(width: 0, height: 44)
+            layout.sectionHeadersPinToVisibleBounds = true
+            
             return layout
         }()
         

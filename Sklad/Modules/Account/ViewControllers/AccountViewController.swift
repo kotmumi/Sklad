@@ -23,7 +23,7 @@ class AccountViewController: UIViewController {
     }
     
     private func setupUI() {
-        accountView.signOutButton.addAction(UIAction { [weak self] _ in
+        accountView.userProfileView.signOutButton.addAction(UIAction { [weak self] _ in
             guard let self else { return }
             self.signOut()
         }, for: .touchUpInside)

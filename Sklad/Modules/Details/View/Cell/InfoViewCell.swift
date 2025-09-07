@@ -150,7 +150,7 @@ final class InfoViewCell: UITableViewCell {
         ])
     }
     
-    func config(item: Item) {
+    func config(item: Item, writeOff: [ItemWriteOff]) {
         name.text = item.details.commercialName
         actualName.text = item.details.technicalName
         count.text = "\(formatNumber(item.stock.availableQuantity)) \(item.stock.unit)"

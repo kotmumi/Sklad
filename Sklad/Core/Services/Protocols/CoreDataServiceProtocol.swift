@@ -9,7 +9,9 @@ import CoreData
 
 protocol CoreDataServiceProtocol {
     func saveItems(_ items: [Item]) async
+    func saveWriteOff(_ items: [ItemWriteOff]) async 
     func fetchAllItems() -> [ItemEntity]
+    func fetchAllWriteOffItems() -> [WriteOffEntity]
     func searchItems(query: String) -> [ItemEntity]
     func deleteAllItems() async
 }

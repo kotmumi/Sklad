@@ -73,8 +73,8 @@ class MainViewController2: UIViewController {
         mainView.collectionView.refreshControl = refreshControl
         refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
         
-        guard let navControll =  navigationController as? CustomNavigationController else {return}
-        navControll.filterButton.addTarget(self, action: #selector(tapFilterButton), for: .touchUpInside)
+       // guard let navControll =  navigationController as? CustomNavigationController else {return}
+        // navControll.filterButton.addTarget(self, action: #selector(tapFilterButton), for: .touchUpInside)
     }
 
     @objc
@@ -200,7 +200,7 @@ extension MainViewController2 {
             let project = objects.values[i][4]
             let status = objects.values[i][5]
             
-            itemsWriteOff.append(ItemWriteOff(id: i, name: name, quantity: count, unit: unit, author: author, project: project, status: status))
+            itemsWriteOff.append(ItemWriteOff(id: i, name: name, quantity: count, unit: unit, author: author, project: project, status: status, comment: nil, date: nil))
             
             if let index = self.items.firstIndex(where: {
                 $0.details.commercialName == name || $0.details.commercialName.dropFirst(3) == name
@@ -257,7 +257,7 @@ extension MainViewController2 {
             }
             guard let navigationController = self.navigationController as? CustomNavigationController else { return }
             
-            navigationController.filterButton.isHidden = true
+           // navigationController.filterButton.isHidden = true
             searchControll.searchBar.showsCancelButton = true
             searchControll.searchBar.searchTextField.layer.borderColor = UIColor.black.cgColor
             DispatchQueue.main.async() {
@@ -279,7 +279,7 @@ extension MainViewController2 {
             }
             searchControll.searchBar.searchTextField.layer.borderColor = UIColor.lightGray.cgColor
             searchControll.searchBar.showsCancelButton = false
-            navigationController.filterButton.isHidden = false
+          //  navigationController.filterButton.isHidden = false
         }
         
     }

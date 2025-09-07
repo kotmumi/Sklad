@@ -90,7 +90,8 @@ final class AppCoordinator: Coordinator {
 //            tabBarController.viewControllers = [mainNavigationController,scanerNavigationController, accountNavigationController]
 //            mainCoordinator.parentCoordinator = self
 //            self.addChild(mainCoordinator)
-            tabBarController.viewControllers = [mainTab.navigationController, scannerTab.navController, accountTab.navController]
+            guard let mainNavigationController = mainTab.navigationController as? CustomNavigationController else { return }
+            tabBarController.viewControllers = [mainNavigationController, scannerTab.navController, accountTab.navController]
             
             mainTab.parentCoordinator = self
                   self.addChild(mainTab)
@@ -102,20 +103,21 @@ final class AppCoordinator: Coordinator {
     }
     
     private func createMainTab() -> MainCoordinator {
+        let coordinator = MainCoordinator()
         
-        let coordinator = MainCoordinator(navigationController: CustomNavigationController(rootViewController: UIViewController()))
         let viewModel = MainViewModel(
-            googleSheetsManager: googleSheetsService,
-            coreDataService: coreDataService,
-            coordinator: coordinator
-        )
-        coordinator.mainViewModel = viewModel
+                    googleSheetsManager: googleSheetsService,
+                    coreDataService: coreDataService,
+                    coordinator: coordinator
+                )
+        
         let viewController = MainViewController(viewModel: viewModel)
         viewController.coordinator = coordinator
         
-       // let navController = CustomNavigationController()//(viewController: viewController)
-        //coordinator.navigationController = navController
-        coordinator.navigationController.tabBarItem = UITabBarItem(
+        let navController = CustomNavigationController(rootViewController: viewController)
+        coordinator.navigationController = navController
+
+        navController.tabBarItem = UITabBarItem(
             title: "Sklad",
             image: UIImage(systemName: "tray.full.fill"),
             tag: 0
