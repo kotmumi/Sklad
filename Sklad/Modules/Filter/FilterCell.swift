@@ -16,7 +16,7 @@ class FilterCell: UICollectionViewCell {
     private let rackNumberLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 14, weight: .regular)
-        label.textColor = .black
+        label.textColor = .textPrimary
         label.backgroundColor = .clear
         label.text = "rack number"
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -25,7 +25,7 @@ class FilterCell: UICollectionViewCell {
     
     private let button: UIButton = {
         let button = UIButton()
-        button.tintColor = .white
+        button.tintColor = .buttonFilter
         button.setImage(UIImage(systemName: "xmark"), for: .normal)
         button.translatesAutoresizingMaskIntoConstraints = false
         return button
@@ -43,7 +43,7 @@ class FilterCell: UICollectionViewCell {
     }
     
     private func setupUI() {
-        backgroundColor = .white
+        backgroundColor = .buttonFilter
         translatesAutoresizingMaskIntoConstraints = false
         addSubview(rackNumberLabel)
         addSubview(button)
@@ -53,7 +53,7 @@ class FilterCell: UICollectionViewCell {
     private func setupConstraints() {
         NSLayoutConstraint.activate([
             
-            rackNumberLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
+            rackNumberLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 19),
             rackNumberLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
             
             button.centerYAnchor.constraint(equalTo: centerYAnchor),
@@ -67,10 +67,11 @@ class FilterCell: UICollectionViewCell {
         if isActive {
             isSelect = true
             _ = select()
-            frame.size.width += 8
+            frame.size.width += 16
         } else {
             isSelect = false
-            backgroundColor = .white
+            backgroundColor = .buttonFilter
+            rackNumberLabel.textColor = .textPrimary
         }
         rackNumberLabel.text = "\(rack)"
     }
@@ -79,17 +80,19 @@ class FilterCell: UICollectionViewCell {
         isSelect.toggle()
         switch isSelect {
         case true:
-            self.deltaX -= 8
+            self.deltaX -= 16
             UIView.animate(withDuration: 0.3) {
-                self.backgroundColor = .systemBlue
-                self.frame.size.width += 8
+                self.backgroundColor = .buttonPrimary
+                self.rackNumberLabel.textColor = .textPrimaryInv
+                self.frame.size.width += 16
                 self.layoutIfNeeded()
             }
         case false:
-            self.deltaX += 8
+            self.deltaX += 16
             UIView.animate(withDuration: 0.3) {
-                self.backgroundColor = .white
-                self.frame.size.width -= 8
+                self.backgroundColor = .buttonFilter
+                self.rackNumberLabel.textColor = .textPrimary
+                self.frame.size.width -= 16
                 self.layoutIfNeeded()
             }
         }

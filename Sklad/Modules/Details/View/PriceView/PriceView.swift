@@ -19,7 +19,7 @@ final class PriceView: UIView {
     
     private let separator: UIView = {
         let view = UIView()
-        view.backgroundColor = .lightGray
+        view.backgroundColor = .textSecondary
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()

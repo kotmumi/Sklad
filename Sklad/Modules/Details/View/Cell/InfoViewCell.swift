@@ -28,7 +28,7 @@ final class InfoViewCell: UITableViewCell {
         label.font = .systemFont(ofSize: 12, weight: .regular)
         label.textAlignment = .left
         label.numberOfLines = 0
-        label.textColor = .lightGray
+        label.textColor = .textSecondary
         label.text = "Номенклатура:"
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -39,7 +39,7 @@ final class InfoViewCell: UITableViewCell {
         label.font = .systemFont(ofSize: 18, weight: .bold)
         label.textAlignment = .left
         label.numberOfLines = 0
-        label.textColor = .black
+        label.textColor = .textPrimary
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -49,7 +49,7 @@ final class InfoViewCell: UITableViewCell {
         label.font = .systemFont(ofSize: 12, weight: .regular)
         label.textAlignment = .left
         label.numberOfLines = 0
-        label.textColor = .lightGray
+        label.textColor = .textSecondary
         label.text = "Номенклатура фактическая:"
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -60,21 +60,21 @@ final class InfoViewCell: UITableViewCell {
         label.font = .systemFont(ofSize: 18, weight: .bold)
         label.textAlignment = .left
         label.numberOfLines = 0
-        label.textColor = .black
+        label.textColor = .textPrimary
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
     private let separatorTop: UIView = {
         let view = UIView()
-        view.backgroundColor = .lightGray
+        view.backgroundColor = .textSecondary
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
     
     private let separatorBottom: UIView = {
         let view = UIView()
-        view.backgroundColor = .lightGray
+        view.backgroundColor = .textSecondary
         view.translatesAutoresizingMaskIntoConstraints = false
         return view
     }()
@@ -83,7 +83,7 @@ final class InfoViewCell: UITableViewCell {
         let label = UILabel()
         label.font = .systemFont(ofSize: 12, weight: .regular)
         label.textAlignment = .left
-        label.textColor = .systemGray
+        label.textColor = .textSecondary
         label.text = "Доступное количество:"
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -93,7 +93,7 @@ final class InfoViewCell: UITableViewCell {
         let label = UILabel()
         label.font = .systemFont(ofSize: 12, weight: .regular)
         label.textAlignment = .left
-        label.textColor = .systemGray
+        label.textColor = .textSecondary
         label.text = "Комментарий:"
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -102,7 +102,7 @@ final class InfoViewCell: UITableViewCell {
         let label = UILabel()
         label.font = .systemFont(ofSize: 14, weight: .regular)
         label.textAlignment = .left
-        label.textColor = .black
+        label.textColor = .textPrimary
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -118,6 +118,12 @@ final class InfoViewCell: UITableViewCell {
     }
     
     private func setupUI() {
+        selectionStyle = .none
+        backgroundColor = .backgroundSecondary
+        layer.cornerRadius = 24
+        layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
+        layer.masksToBounds = true
+        
         addSubview(verticalStackView)
         verticalStackView.addArrangedSubview(separatorTop)
         verticalStackView.addArrangedSubview(nameLabel)

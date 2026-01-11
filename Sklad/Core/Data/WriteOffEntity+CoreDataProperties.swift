@@ -23,8 +23,10 @@ extension WriteOffEntity {
     @NSManaged public var author: String?
     @NSManaged public var project: String?
     @NSManaged public var status: String?
-    @NSManaged public var date: Date?
+    @NSManaged public var comment: String?
+    @NSManaged public var date: String?
     @NSManaged public var isSynced: Bool
+    
 
 }
 

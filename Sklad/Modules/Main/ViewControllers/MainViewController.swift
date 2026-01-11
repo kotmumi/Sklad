@@ -33,7 +33,6 @@ class MainViewController: UIViewController {
         view = mainView
     }
     
-  
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -51,26 +50,44 @@ class MainViewController: UIViewController {
         tabBarController?.isTabBarHidden = false
         
         guard let navController = navigationController as? CustomNavigationController else { return }
+        if navController.searchController.searchBar.searchTextField.text == "" {
             navController.trailingPadding = 16
+        } else {
+            navController.trailingPadding = 80
+        }
+        navController.setupSearchBarAppearance()
         navController.isSearchBarHidden = false
+        navController.navigationBar.isHidden = false
+        
+        Task {
+            await viewModel.refreshData()
+        }
+        mainView.collectionView.reloadData()
     }
     
     
     private func setupUI() {
-        
-        navigationController?.navigationBar.isHidden = false
-        navigationItem.searchController?.searchBar.delegate = self
-        navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
-    
-        mainView.collectionView.register(ProductCellView.self,
-                                           forCellWithReuseIdentifier: ProductCellView.identifier)
         mainView.collectionView.delegate = self
         mainView.collectionView.refreshControl = refreshControl
+        
+        
+       // navigationController?.navigationBar.isHidden = false
+        navigationItem.searchController?.searchBar.delegate = self
+        
+        navigationItem.backBarButtonItem = UIBarButtonItem(title: "", style: .plain, target: nil, action: nil)
+        guard let navController = navigationController as? CustomNavigationController else { return }
+        navController.scannerButton.addAction(UIAction { [weak self] _ in
+            self?.coordinator?.goToScanner()
+        }, for: .touchUpInside)
+        mainView.collectionView.register(ProductCellView.self,
+                                           forCellWithReuseIdentifier: ProductCellView.identifier)
+       
+        mainView.filterButton.addTarget(self, action: #selector(tapFilterButton), for: .touchUpInside)
+        
         refreshControl.addAction(UIAction { [weak self] _ in
             guard let self else {return}
             self.refreshData()
         }, for: .valueChanged)
-        mainView.filterButton.addTarget(self, action: #selector(tapFilterButton), for: .touchUpInside)
     }
     
     private func setupFetchedResultsController() {
@@ -112,7 +129,15 @@ class MainViewController: UIViewController {
             }
             let item = Item(from: itemEntity)
             cell.config(whit: item)
-            
+            cell.bookMarkButton.addAction(UIAction { _ in
+                if cell.bookMarkButton.imageView?.image == UIImage(systemName: "bookmark") {
+                    cell.bookMarkButton.setImage(UIImage(systemName: "bookmark.fill"), for: .normal)
+                    cell.bookMarkButton.tintColor = .buttonPrimary
+                } else {
+                    cell.bookMarkButton.setImage(UIImage(systemName: "bookmark"), for: .normal)
+                    cell.bookMarkButton.tintColor = .backgroundTertiary
+                }
+            }, for: .touchUpInside)
             return cell
         }
         applySnapshot()
@@ -134,6 +159,13 @@ class MainViewController: UIViewController {
                 if let errorMessage = errorMessage {
                     self?.showErrorAlert(message: errorMessage)
                 }
+            }
+            .store(in: &cancellables)
+        
+        viewModel.reloade
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                self?.applySnapshot()
             }
             .store(in: &cancellables)
     }
@@ -197,6 +229,7 @@ extension MainViewController: UICollectionViewDelegate {
         
         let item = Item(from: itemEntity)
         let writeOff = viewModel.getWriteOffs(for: item.details.commercialName)
+        print("\(item.details.commercialName) - allocated:\(item.stock.allocatedQuantity) - test: \(item.stock.testedQuantity)")
         coordinator?.goToDetails(item: item, writeOff: writeOff)
     }
 }
@@ -206,7 +239,7 @@ extension MainViewController: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView,
                        layout collectionViewLayout: UICollectionViewLayout,
                        sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let width = (collectionView.bounds.width - 44) / 2
+        let width = (collectionView.bounds.width - 60) / 2
         return CGSize(width: width, height: width)
     }
 }

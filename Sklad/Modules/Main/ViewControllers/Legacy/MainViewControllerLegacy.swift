@@ -272,7 +272,7 @@ extension MainViewController2 {
         
         func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
             
-            guard let navigationController = self.navigationController as? CustomNavigationController else { return }
+           // guard let _ = self.navigationController as? CustomNavigationController else { return }
             
             guard let searchControll = self.navigationItem.searchController else {
                 return

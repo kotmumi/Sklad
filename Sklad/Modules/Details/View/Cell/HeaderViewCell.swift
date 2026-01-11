@@ -24,6 +24,11 @@ final class HeaderViewCell: UITableViewCell {
     }
     
     private func setupUI() {
+        selectionStyle = .none
+        backgroundColor = .backgroundSecondary
+        layer.cornerRadius = 24
+        //layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        layer.masksToBounds = true
         addSubview(itemCount)
     }
     
@@ -36,7 +41,10 @@ final class HeaderViewCell: UITableViewCell {
         ])
     }
     
-    func config(item: Item) {
+    func config(item: Item, last: Bool = false) {
         itemCount.config(item: item)
+        if !last {
+            layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        }
     }
 }

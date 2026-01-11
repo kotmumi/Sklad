@@ -11,10 +11,10 @@ final class ProjectViewCell: UITableViewCell {
     
     static let reuseIdentifier = "ProjectViewCell"
     
-    private let projectNumberLabel: UILabel = {
+    private var projectNumberLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .left
-        label.backgroundColor = .systemGray5
+        label.backgroundColor = .buttonTertiary
         label.layer.cornerRadius = 16
         label.translatesAutoresizingMaskIntoConstraints = false
         label.layer.masksToBounds = true
@@ -30,7 +30,7 @@ final class ProjectViewCell: UITableViewCell {
             attributes: [
                 .paragraphStyle: paragraphStyle,
                 .font: UIFont.systemFont(ofSize: 12),
-                .foregroundColor: UIColor.systemGray
+                .foregroundColor: UIColor.textSecondary
             ]
         )
 
@@ -38,12 +38,12 @@ final class ProjectViewCell: UITableViewCell {
         return label
     }()
     
-    private let projectNameLabel: UILabel = {
+    private var projectNameLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 16, weight: .regular)
         label.textAlignment = .left
         label.numberOfLines = 0
-        label.textColor = .black
+        label.textColor = .textPrimary
         label.text = "Транспортная система паллетайзера №3 (Упак. Машина Somic сист № 36957) ПФ Пинск"
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -61,9 +61,9 @@ final class ProjectViewCell: UITableViewCell {
     
     private func setupUI() {
         //translatesAutoresizingMaskIntoConstraints = false
-        layer.cornerRadius = 20
+        layer.cornerRadius = 25
         layer.borderWidth = 1
-        layer.borderColor = UIColor.systemGray5.cgColor
+        layer.borderColor = UIColor.backgroundTertiary.cgColor
         layer.masksToBounds = true
         clipsToBounds = true
         addSubview(projectNumberLabel)
@@ -84,7 +84,24 @@ final class ProjectViewCell: UITableViewCell {
         ])
     }
     
-    func config(item: Item) {
-       
+    func config(project: Project) {
+        
+        projectNameLabel.text = project.name
+        
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.firstLineHeadIndent = 16
+        paragraphStyle.tailIndent = 16
+        paragraphStyle.alignment = .natural
+        paragraphStyle.lineBreakMode = .byWordWrapping
+        
+        let attributedString = NSAttributedString(
+            string: "Сист.№ \(String(project.systemNumber ?? 0))     ",
+            attributes: [
+                .paragraphStyle: paragraphStyle,
+                .font: UIFont.systemFont(ofSize: 12),
+                .foregroundColor: UIColor.systemGray
+            ]
+        )
+        projectNumberLabel.attributedText = attributedString
     }
 }

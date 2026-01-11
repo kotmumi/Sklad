@@ -12,20 +12,23 @@ class DetailsView: UIView {
     let segmentedControl = CustomSegmentedControlView()
     private let itemCount = ItemCountView()
     
+    let statusView = StatusIndicatorView()
+    
     let tableView: UITableView = {
         let tableView = UITableView()
         tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.layer.cornerRadius = 16
+        tableView.layer.cornerRadius = 24
         tableView.separatorStyle = .none
-        tableView.backgroundColor = .white
+        tableView.backgroundColor = .backgroundPrimary
         return tableView
     }()
     
     let writeOffButton: UIButton = {
         let button = UIButton()
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.backgroundColor = .systemBlue
+        button.backgroundColor = .buttonPrimary
         button.setTitle("Списать", for: .normal)
+        button.tintColor = .textPrimary
         button.layer.cornerRadius = 25
         return button
     }()
@@ -40,9 +43,11 @@ class DetailsView: UIView {
     }
     
     private func setupUI() {
-        backgroundColor = .background
+        backgroundColor = .backgroundPrimary
+        segmentedControl.segmentedControl.translatesAutoresizingMaskIntoConstraints = false
         addSubview(segmentedControl)
-        segmentedControl.segmentedControl.roundCorners(radius: 25)
+        addSubview(statusView)
+        //segmentedControl.segmentedControl.roundCorners(radius: 25)
         addSubview(tableView)
         addSubview(writeOffButton)
   
@@ -54,6 +59,7 @@ class DetailsView: UIView {
             segmentedControl.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
             segmentedControl.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor),
             segmentedControl.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor),
+        
             tableView.topAnchor.constraint(equalTo: segmentedControl.bottomAnchor, constant: 16),
             tableView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             tableView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
@@ -65,7 +71,3 @@ class DetailsView: UIView {
         ])
     }
 }
-
-//#Preview {
- //   DetailsViewController()
-//}

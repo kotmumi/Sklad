@@ -41,10 +41,10 @@ final class CountLabel: UILabel {
         translatesAutoresizingMaskIntoConstraints = false
         backgroundColor = style.color
         layer.borderWidth = 1
-        layer.borderColor = UIColor.white.cgColor
+        layer.borderColor = UIColor.backgroundTertiary.cgColor
         layer.cornerRadius = 16
         layer.masksToBounds = true
-        textColor = .white
+        textColor = .textPrimary
         textAlignment = .left
         font = .systemFont(ofSize: 14, weight: .regular)
         text = "-"

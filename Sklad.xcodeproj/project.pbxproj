@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		533E8B362E3932E80025313E /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 533E8B352E3932E80025313E /* GoogleSignIn */; };
 		533E8B382E3932E80025313E /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 533E8B372E3932E80025313E /* GoogleSignInSwift */; };
+		538ECAED2F1169580025D51F /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 538ECAEC2F1169580025D51F /* Lottie */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -43,6 +44,7 @@
 			files = (
 				533E8B362E3932E80025313E /* GoogleSignIn in Frameworks */,
 				533E8B382E3932E80025313E /* GoogleSignInSwift in Frameworks */,
+				538ECAED2F1169580025D51F /* Lottie in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -53,6 +55,7 @@
 			isa = PBXGroup;
 			children = (
 				533E8AF12E3929690025313E /* Sklad */,
+				538BAFD12E8528470009462B /* Frameworks */,
 				533E8AF02E3929690025313E /* Products */,
 			);
 			sourceTree = "<group>";
@@ -63,6 +66,13 @@
 				533E8AEF2E3929690025313E /* Sklad.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		538BAFD12E8528470009462B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -87,6 +97,7 @@
 			packageProductDependencies = (
 				533E8B352E3932E80025313E /* GoogleSignIn */,
 				533E8B372E3932E80025313E /* GoogleSignInSwift */,
+				538ECAEC2F1169580025D51F /* Lottie */,
 			);
 			productName = Sklad;
 			productReference = 533E8AEF2E3929690025313E /* Sklad.app */;
@@ -118,6 +129,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				533E8B342E3932E80025313E /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				538ECAEB2F1169580025D51F /* XCRemoteSwiftPackageReference "lottie-spm" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 533E8AF02E3929690025313E /* Products */;
@@ -156,14 +168,15 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 1.0.2;
 				DEVELOPMENT_TEAM = HJSJBAH7VU;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Sklad/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Приложению требуется доступ к камере для сканирования QR-кодов";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Приложению нужен доступ к камере для сканирования QR-кодов";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -185,14 +198,15 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 1.0.2;
 				DEVELOPMENT_TEAM = HJSJBAH7VU;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Sklad/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "";
-				INFOPLIST_KEY_NSCameraUsageDescription = "Приложению требуется доступ к камере для сканирования QR-кодов";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Приложению нужен доступ к камере для сканирования QR-кодов";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDarkContent;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -359,6 +373,14 @@
 				minimumVersion = 9.0.0;
 			};
 		};
+		538ECAEB2F1169580025D51F /* XCRemoteSwiftPackageReference "lottie-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airbnb/lottie-spm";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.6.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -371,6 +393,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 533E8B342E3932E80025313E /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
 			productName = GoogleSignInSwift;
+		};
+		538ECAEC2F1169580025D51F /* Lottie */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 538ECAEB2F1169580025D51F /* XCRemoteSwiftPackageReference "lottie-spm" */;
+			productName = Lottie;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

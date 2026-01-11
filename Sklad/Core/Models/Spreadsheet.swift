@@ -21,7 +21,7 @@ struct Spreadsheet {
     }
     
     struct StorageSheet {
-        static let id = "1-mA5I8e-knb5VKjAc3OQU11zSa9WUw0pNF16qpVmTHI"//-тестовая  /*"1YDfMuU23ZiDN8HegT4OgMkWXp--Vv9o2QwXNqPDTHik"- реальная таблица*/
+        static let id = "1YDfMuU23ZiDN8HegT4OgMkWXp--Vv9o2QwXNqPDTHik" //"1-mA5I8e-knb5VKjAc3OQU11zSa9WUw0pNF16qpVmTHI"//-тестовая  /*"1YDfMuU23ZiDN8HegT4OgMkWXp--Vv9o2QwXNqPDTHik"- реальная таблица*/
         static let storageList = "'Остатки технопарка'"
         static let projectList = "'Список Объектов'"
     }
@@ -31,6 +31,7 @@ struct Spreadsheet {
         static let writeOffList = {
             "'Списание \(getCurrentMonthYear())'"
         }
+        static let userList = "'Список сотрудников'"
         static let writeOffListName = {
             "Списание \(getCurrentMonthYear())"
         }

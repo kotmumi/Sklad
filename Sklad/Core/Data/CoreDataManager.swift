@@ -19,7 +19,6 @@ final class CoreDataManager {
                 fatalError("Unresolved error \(error), \(error.userInfo)")
             }
         }
-
         //(Проверить потом) Автоматически сливаем изменения из viewContext в store 
      //   viewContext.automaticallyMergesChangesFromParent = true
     }

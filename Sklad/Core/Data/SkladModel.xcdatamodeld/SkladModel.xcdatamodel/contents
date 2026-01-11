@@ -12,9 +12,13 @@
         <attribute name="totalPrice" optional="YES" attributeType="String"/>
         <attribute name="unit" optional="YES" attributeType="String"/>
     </entity>
+    <entity name="UserEntity" representedClassName="UserEntity" syncable="YES">
+        <attribute name="name" attributeType="String"/>
+    </entity>
     <entity name="WriteOffEntity" representedClassName="WriteOffEntity" syncable="YES">
         <attribute name="author" optional="YES" attributeType="String"/>
-        <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="comment" optional="YES" attributeType="String"/>
+        <attribute name="date" optional="YES" attributeType="String"/>
         <attribute name="id" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="isSynced" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
         <attribute name="itemName" optional="YES" attributeType="String"/>

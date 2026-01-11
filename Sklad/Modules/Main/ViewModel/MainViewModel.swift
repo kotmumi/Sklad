@@ -12,11 +12,14 @@ final class MainViewModel {
     
     var selectedChars = Set<String>()
     var selectedNumbers = Set<String>()
+    var users: [User] = []
 
     @Published var items: [Item] = []
     @Published var itemsWriteOff: [ItemWriteOff] = []
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
+    
+    var reloade = PassthroughSubject<Void, Never>()
     
     private let googleSheetsManager: GoogleSheetsDataFetching
     private let coreDataService: CoreDataServiceProtocol
@@ -38,17 +41,24 @@ final class MainViewModel {
         showCachedData()
         
         do {
-            let networkItems = try await fetchFromNetwork()
-            let networkWriteOffItems = try await fetchWriteOffFromNetwork()
+            async let itemsTask = fetchFromNetwork()
+            async let writeOffTask = fetchWriteOffFromNetwork()
+            async let usersTask = fetchUsers()
+
+            let (networkItems, networkWriteOffItems, networkUser) = await (
+                try itemsTask, try writeOffTask, try usersTask
+            )
+            
             await coreDataService.saveItems(networkItems)
             await coreDataService.saveWriteOff(networkWriteOffItems)
+            await coreDataService.saveUser(networkUser)
             showCachedData()
             errorMessage = nil
         } catch {
             errorMessage = "Не удалось обновить данные. Работаем в офлайн-режиме."
         }
+        reloade.send()
         isLoading = false
-       // CoreDataManager.shared.printAllItems()
     }
     
     @MainActor
@@ -80,8 +90,6 @@ final class MainViewModel {
         itemsWriteOff = cachedWriteOffEntities.map { entity in
             ItemWriteOff(from: entity)
         }
-        print(itemsWriteOff)
-        
     }
     
     private func fetchFromNetwork() async throws -> [Item] {
@@ -100,6 +108,11 @@ final class MainViewModel {
             range: Spreadsheet.WriteOffSheet.writeOffList()
         )
         return processResponseWriteOff(objects)
+    }
+    
+    private func fetchUsers() async throws -> [User] {
+        let objects = try await googleSheetsManager.fetchData(spreadsheetId: Spreadsheet.WriteOffSheet.id, range: Spreadsheet.WriteOffSheet.userList)
+        return processResponseUsers(objects)
     }
     
     private func processResponse(_ response: GoogleSheetResponse) -> [Item] {
@@ -141,7 +154,7 @@ final class MainViewModel {
         var processedItemWriteOffs: [ItemWriteOff] = []
         
         for (index, obj) in response.values.enumerated() {
-            guard index >= 2, obj.count > 5 else { continue }
+            guard index >= 1, obj.count > 5 else { continue }
             
             let name = obj[0]
             let unit = obj[1]
@@ -149,13 +162,28 @@ final class MainViewModel {
                 .replacingOccurrences(of: ",", with: ".")
                 .replacingOccurrences(of: " ", with: "")
             guard let quantity = Double(stringCount) else {
-                print("Ошибка: неверный формат количества в строке \(index)")
+                //print("Ошибка: неверный формат количества в строке \(index)")
                 continue
             }
             
             let author = obj[3]
             let project = obj[4]
             let status = obj[5]
+            var comment: String
+            var dateString: String
+            if obj.count > 6 {
+                comment = obj[6]
+            } else {
+               // print("\(name) Комментарий отсутствует")
+                comment = ""
+            }
+            
+            if obj.count > 7 {
+                dateString = obj[7]
+            } else {
+               // print("\(name) Время отсутствует")
+                dateString = ""
+            }
             
             let itemWriteOff = ItemWriteOff(
                 id: index,
@@ -165,25 +193,41 @@ final class MainViewModel {
                 author: author,
                 project: project,
                 status: status,
-                comment: nil,
-                date: nil
+                comment: comment,
+                date: dateString
             )
             
             processedItemWriteOffs.append(itemWriteOff)
-            
+           
             // Обновление основного массива items
             if let index = items.firstIndex(where: {
                 $0.details.commercialName == name ||
                 $0.details.commercialName.dropFirst(3) == name
             }) {
-                if status == "Взял на тесты" {
+                if status == "Переместить на Телипко М.Г." {
                     items[index].stock.testedQuantity += quantity
+                   // print("\(items[index].details.commercialName) \(status)")
                 } else {
                     items[index].stock.allocatedQuantity += quantity
                 }
+              //  print("\(items[index].details.commercialName) allocated = \(items[index].stock.allocatedQuantity) test = \(items[index].stock.testedQuantity)")
             }
+            
+            
         }
-        
+       // print("writeOff count = \(processedItemWriteOffs.count)")
         return processedItemWriteOffs
+    }
+    
+    private func processResponseUsers(_ response: GoogleSheetResponse) -> [User] {
+        var users: [User] = []
+        
+        for (index, obj) in response.values.enumerated() {
+            guard obj.count > 1, index > 0 else { continue }
+            
+            let name = obj[1]
+            users.append(User(name: name))
+        }
+        return users
     }
 }

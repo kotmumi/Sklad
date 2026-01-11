@@ -16,8 +16,11 @@ final class MainCoordinator: Coordinator {
     
     var tabBarController: MainTabBarController?
   
-    init(navigationController: UINavigationController = UINavigationController()) {
+    private let coreDataService: CoreDataServiceProtocol
+    
+    init(navigationController: UINavigationController = UINavigationController(),coreDataService: CoreDataServiceProtocol) {
         self.navigationController = navigationController
+        self.coreDataService = coreDataService
     }
     
     func start() {
@@ -41,8 +44,16 @@ final class MainCoordinator: Coordinator {
         
     }
     
+    func goToScanner() {
+        guard let customNavigationController = navigationController as? CustomNavigationController else { return }
+        let scannerCoordinator = ScannerCoordinator(coreDataService: coreDataService, navigationController: customNavigationController)
+        addChild(scannerCoordinator)
+        scannerCoordinator.start()
+        
+    }
+    
     func goToDetails(item: Item, writeOff: [ItemWriteOff]) {
-        let detailsCoordinator = DetailsCoordinator(navigationController: navigationController , item: item, writeOff: writeOff)
+        let detailsCoordinator = DetailsCoordinator(navigationController: navigationController , item: item, writeOff: writeOff, coreDataService: coreDataService)
         detailsCoordinator.parentCoordinator = self
         addChild(detailsCoordinator)
         detailsCoordinator.start()

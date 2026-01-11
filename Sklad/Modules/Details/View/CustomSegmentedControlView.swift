@@ -9,14 +9,27 @@ import UIKit
 
 class CustomSegmentedControlView: UIView {
     
-     let segmentedControl: UISegmentedControl = {
+    let title = ["Доступно", "На тесте", "Списано"]
+    
+    let segmentedControl = MainSegmentedControl()/*: UISegmentedControl = {
         let segment = UISegmentedControl(items: ["Доступно", "На тесте", "Списано"])
         segment.selectedSegmentIndex = 0
         segment.translatesAutoresizingMaskIntoConstraints = false
         segment.layer.cornerRadius = 16
+        segment.layer.masksToBounds = true
+        
+        segment.setTitleTextAttributes([
+            .foregroundColor: UIColor.black,
+               .font: UIFont.systemFont(ofSize: 14)
+           ], for: .normal)
+           
+           segment.setTitleTextAttributes([
+               .foregroundColor: UIColor.white,
+               .font: UIFont.systemFont(ofSize: 14)
+           ], for: .selected)
         return segment
     }()
-    
+    */
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
@@ -29,7 +42,7 @@ class CustomSegmentedControlView: UIView {
     
     private func setupUI() {
         translatesAutoresizingMaskIntoConstraints = false
-        backgroundColor = .background
+        backgroundColor = .backgroundPrimary
         addSubview(segmentedControl)
     }
     
@@ -37,13 +50,13 @@ class CustomSegmentedControlView: UIView {
         NSLayoutConstraint.activate([
 
             segmentedControl.topAnchor.constraint(equalTo: topAnchor, constant: 8),
-            segmentedControl.heightAnchor.constraint(equalToConstant: 32),
+            segmentedControl.heightAnchor.constraint(equalToConstant: 40),
             segmentedControl.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             segmentedControl.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
             segmentedControl.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
         ])
     }
-   }
+}
 
 extension UISegmentedControl {
     func roundCorners(radius: CGFloat) {

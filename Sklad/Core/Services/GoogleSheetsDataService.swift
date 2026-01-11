@@ -53,24 +53,11 @@ final class GoogleSheetsDataService: GoogleSheetsService {
         }
     }
     
-//    private func verifyTokenScopes(token: String) {
-//        let url = URL(string: "https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=\(token)")!
-//        
-//        URLSession.shared.dataTask(with: url) { data, _, _ in
-//            if let data = data,
-//               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-//               let scopes = json["scope"] as? String {
-//                //print("Токен имеет scope: \(scopes)")
-//            }
-//        }.resume()
-//    }
-    
     func fetchData(spreadsheetId: String, range: String, completion: @escaping (Result<GoogleSheetResponse, NetworkError>) -> Void) {
         guard let token = googleSignInService.getToken() else {
             completion(.failure(.tokenError))
             return
         }
-       // verifyTokenScopes(token: token)
         
         let urlString = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId)/values/\(range)"
         
@@ -78,7 +65,7 @@ final class GoogleSheetsDataService: GoogleSheetsService {
             completion(.failure(.invalidURL))
             return
         }
-       
+        
         // 4. Настройка запроса
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
@@ -100,8 +87,8 @@ final class GoogleSheetsDataService: GoogleSheetsService {
                 return
             }
             
-           // print("🔵 Status code: \(httpResponse.statusCode)")
-                     //  print("🔵 Headers: \(httpResponse.allHeaderFields)")
+            // print("🔵 Status code: \(httpResponse.statusCode)")
+            //  print("🔵 Headers: \(httpResponse.allHeaderFields)")
             // 8. Проверка статус-кода
             guard (200..<300).contains(httpResponse.statusCode) else {
                 print("🔴 API error: \(httpResponse.statusCode)")
@@ -144,7 +131,7 @@ final class GoogleSheetsDataService: GoogleSheetsService {
             return
         }
         
-        let urlString = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId)/values/\(range):append?valueInputOption=USER_ENTERED"
+        let urlString = "https://sheets.googleapis.com/v4/spreadsheets/\(spreadsheetId)/values/\(range):append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS"
         
         guard let url = URL(string: urlString) else { return }
         
@@ -176,14 +163,10 @@ final class GoogleSheetsDataService: GoogleSheetsService {
             }
             
             print("Status code: \(httpResponse.statusCode)")
-            
+            print(range)
             // 3. Проверка успешного статус-кода (200-299)
             guard (200...299).contains(httpResponse.statusCode) else {
-                //print("Server error: \(httpResponse.statusCode)")
-                //if let data = data {
-                   // let responseString = String(data: data, encoding: .utf8) ?? ""
-                    //print("Response body: \(responseString)")
-               // }
+                
                 completion(.failure(.forbidden(message: "Server error: \(httpResponse.statusCode)")))
                 return
             }
@@ -215,7 +198,7 @@ final class GoogleSheetsDataService: GoogleSheetsService {
         guard let token = googleSignInService.getToken() else {
             throw NetworkError.tokenError
         }
-
+        
         let urlString = "https://sheets.googleapis.com/v4/spreadsheets/\(Spreadsheet.WriteOffSheet.id):batchUpdate"
         
         guard let url = URL(string: urlString) else { throw NetworkError.invalidURL }
@@ -245,19 +228,19 @@ final class GoogleSheetsDataService: GoogleSheetsService {
             throw NetworkError.emptyData
         }
         let (data, response) = try await URLSession.shared.data(for: request)
-           
-           guard let httpResponse = response as? HTTPURLResponse else {
-               throw NSError(domain: "NetworkError", code: -3, userInfo: [
-                   NSLocalizedDescriptionKey: "Invalid response type"
-               ])
-           }
-           
-           guard (200...299).contains(httpResponse.statusCode) else {
-               let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
-               throw NSError(domain: "APIError", code: httpResponse.statusCode, userInfo: [
-                   NSLocalizedDescriptionKey: "Server returned error: \(errorMessage)"
-               ])
-           }
+        
+        guard let httpResponse = response as? HTTPURLResponse else {
+            throw NSError(domain: "NetworkError", code: -3, userInfo: [
+                NSLocalizedDescriptionKey: "Invalid response type"
+            ])
+        }
+        
+        guard (200...299).contains(httpResponse.statusCode) else {
+            let errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
+            throw NSError(domain: "APIError", code: httpResponse.statusCode, userInfo: [
+                NSLocalizedDescriptionKey: "Server returned error: \(errorMessage)"
+            ])
+        }
         print("sucsses")
     }
     
@@ -270,32 +253,34 @@ final class GoogleSheetsDataService: GoogleSheetsService {
         
         guard let url = URL(string: urlString) else {
             throw NetworkError.invalidURL
-          }
+        }
         
         var request = URLRequest(url: url)
-            request.httpMethod = "GET"
-            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-            
-            let (data, response) = try await URLSession.shared.data(for: request)
-            
-            guard let httpResponse = response as? HTTPURLResponse,
-                  (200...299).contains(httpResponse.statusCode) else {
-                throw NetworkError.serverError(statusCode: -1, message: "status code: ...")
-            }
+        request.httpMethod = "GET"
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
         
-            let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
-            guard let sheets = json?["sheets"] as? [[String: Any]] else {
-                throw NetworkError.emptyData
-            }
+        let (data, response) = try await URLSession.shared.data(for: request)
+        
+        guard let httpResponse = response as? HTTPURLResponse,
+              (200...299).contains(httpResponse.statusCode) else {
+            throw NetworkError.serverError(statusCode: -1, message: "status code: ...")
+        }
+        
+        let json = try JSONSerialization.jsonObject(with: data) as? [String: Any]
+        guard let sheets = json?["sheets"] as? [[String: Any]] else {
+            throw NetworkError.emptyData
+        }
+        
+        for sheet in sheets {
             
-            for sheet in sheets {
-                if let properties = sheet["properties"] as? [String: Any],
-                   let title = properties["title"] as? String,
-                   let sheetId = properties["sheetId"] as? Int,
-                   title == Spreadsheet.WriteOffSheet.writeOffListName() {
-                    return sheetId
-                }
+            if let properties = sheet["properties"] as? [String: Any],
+               let title = properties["title"] as? String,
+               let sheetId = properties["sheetId"] as? Int,
+               title.lowercased() == Spreadsheet.WriteOffSheet.writeOffListName().lowercased() {
+                return sheetId
             }
+        }
         throw NetworkError.emptyData
     }
+    
 }

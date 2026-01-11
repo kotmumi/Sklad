@@ -14,7 +14,7 @@ class ProductCellView: UICollectionViewCell {
     private let nameProductLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 15, weight: .medium)
-        label.textColor = .black
+        label.textColor = .textPrimary
         label.textAlignment = .left
         label.numberOfLines = 0
         label.text = "name product"
@@ -25,7 +25,7 @@ class ProductCellView: UICollectionViewCell {
     private let containerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .systemGroupedBackground
+        view.backgroundColor = .backgroundTertiary
         view.layer.cornerRadius = 12
         view.layer.masksToBounds = true
         return view
@@ -34,12 +34,28 @@ class ProductCellView: UICollectionViewCell {
     private let rackNumberLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 12, weight: .regular)
-        label.textColor = .black
-        label.backgroundColor = .systemGroupedBackground
+        label.textColor = .textSecondary
+        label.backgroundColor = .backgroundTertiary
         label.textAlignment = .center
         label.text = "rack number"
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
+    }()
+    
+    let bookMarkButton: UIButton = {
+        let button = UIButton(type: .custom)
+        
+        let symbolConfig = UIImage.SymbolConfiguration(
+                pointSize: 24,
+                weight: .light,
+                scale: .default
+            )
+        button.setPreferredSymbolConfiguration(symbolConfig, forImageIn: .normal)
+        
+        button.setImage(UIImage(systemName: "bookmark"), for: .normal)
+        button.tintColor = .backgroundTertiary
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
     }()
     
     override init(frame: CGRect) {
@@ -53,11 +69,14 @@ class ProductCellView: UICollectionViewCell {
     }
     
     private func setupUI() {
-        backgroundColor = .white
+        backgroundColor = .backgroundSecondary
+        layer.borderColor = UIColor.backgroundTertiary.cgColor
+        layer.borderWidth = 1
         layer.cornerRadius = 25
         addSubview(nameProductLabel)
         addSubview(containerView)
         containerView.addSubview(rackNumberLabel)
+        addSubview(bookMarkButton)
     }
     
     
@@ -76,6 +95,11 @@ class ProductCellView: UICollectionViewCell {
             nameProductLabel.topAnchor.constraint(equalTo: rackNumberLabel.bottomAnchor, constant: 16),
             nameProductLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             nameProductLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            nameProductLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -16),
+            
+            bookMarkButton.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
+            bookMarkButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
+            
         ])
     }
 

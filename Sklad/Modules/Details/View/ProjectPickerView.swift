@@ -9,10 +9,10 @@ import UIKit
 
 final class ProjectPickerView: UIView {
     
-    private let projectNumberLabel: UILabel = {
+    private var projectNumberLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .left
-        label.backgroundColor = .systemGray5
+        label.backgroundColor = .backgroundTertiary
         label.layer.cornerRadius = 16
         label.translatesAutoresizingMaskIntoConstraints = false
         label.layer.masksToBounds = true
@@ -28,7 +28,7 @@ final class ProjectPickerView: UIView {
             attributes: [
                 .paragraphStyle: paragraphStyle,
                 .font: UIFont.systemFont(ofSize: 12),
-                .foregroundColor: UIColor.systemGray
+                .foregroundColor: UIColor.textSecondary
             ]
         )
 
@@ -36,12 +36,12 @@ final class ProjectPickerView: UIView {
         return label
     }()
     
-    private let projectNameLabel: UILabel = {
+    private var projectNameLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 16, weight: .regular)
         label.textAlignment = .left
         label.numberOfLines = 0
-        label.textColor = .black
+        label.textColor = .textPrimary
         label.text = "Выберите проект:"
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -51,7 +51,7 @@ final class ProjectPickerView: UIView {
         let imageView = UIImageView(image: UIImage(systemName: "chevron.right"))
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        imageView.tintColor = .lightGray
+        imageView.tintColor = .textSecondary
         return imageView
     }()
     
@@ -68,9 +68,9 @@ final class ProjectPickerView: UIView {
     
     private func setupUI() {
         translatesAutoresizingMaskIntoConstraints = false
-        layer.cornerRadius = 8
+        layer.cornerRadius = 20
         layer.borderWidth = 1
-        layer.borderColor = UIColor.systemGray.cgColor
+        layer.borderColor = UIColor.backgroundTertiary.cgColor
         addSubview(projectNumberLabel)
         addSubview(projectNameLabel)
         addSubview(chevronImage)
@@ -91,5 +91,25 @@ final class ProjectPickerView: UIView {
             chevronImage.topAnchor.constraint(equalTo: topAnchor, constant: 16),
             chevronImage.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
         ])
+    }
+    
+    func config(with project: Project) {
+        
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.firstLineHeadIndent = 16
+        paragraphStyle.tailIndent = 16
+        paragraphStyle.alignment = .natural
+        paragraphStyle.lineBreakMode = .byWordWrapping
+
+        let attributedString = NSAttributedString(
+            string: "Сист.№(\(String(project.systemNumber ?? 0)))     ",
+            attributes: [
+                .paragraphStyle: paragraphStyle,
+                .font: UIFont.systemFont(ofSize: 12),
+                .foregroundColor: UIColor.systemGray
+            ]
+        )
+        projectNumberLabel.attributedText = attributedString
+        projectNameLabel.text = project.name
     }
 }

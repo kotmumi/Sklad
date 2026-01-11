@@ -32,7 +32,7 @@ final class RackView: UIView {
     
     private func setupUI() {
         translatesAutoresizingMaskIntoConstraints = false
-        backgroundColor = .rackBack
+        backgroundColor = .backgroundTertiary
         layer.cornerRadius = 12
         layer.masksToBounds = true
         addSubview(rackNumberLabel)
@@ -53,5 +53,21 @@ final class RackView: UIView {
     func config(rack: String) {
         rackNumberLabel.text = rack
         rackNumberLabel.backgroundColor = .clear
+    }
+    
+}
+
+extension RackView {
+    struct Configuration {
+        
+        let rack: String
+        
+        init(rack: String) {
+            self.rack = rack
+        }
+    }
+    
+    func config(_ configuration: Configuration) {
+        config(rack: configuration.rack)
     }
 }

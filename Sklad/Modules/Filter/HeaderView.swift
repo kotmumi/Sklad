@@ -10,7 +10,7 @@ final class HeaderView: UICollectionReusableView {
     let titleLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont.systemFont(ofSize: 16, weight: .regular)
-        label.textColor = .black
+        label.textColor = .textPrimary
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -25,7 +25,7 @@ final class HeaderView: UICollectionReusableView {
     }
     
     private func setupViews() {
-        backgroundColor = .systemGray6
+        backgroundColor = .backgroundPrimary
         
         addSubview(titleLabel)
         NSLayoutConstraint.activate([

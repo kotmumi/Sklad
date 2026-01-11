@@ -24,8 +24,8 @@ struct ItemWriteOff {
         self.author = item.author ?? ""
         self.project = item.project ?? ""
         self.status = item.status ?? ""
-        self.comment = item.description
-        self.date = item.date?.description
+        self.comment = item.comment
+        self.date = item.date ?? ""
     }
     
     init(id: Int, name : String, quantity: Double, unit: String, author: String, project: String, status: String, comment: String?, date: String?) {

@@ -17,7 +17,7 @@ class AccountView: UIView {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Sklad"
         label.textAlignment = .center
-        label.textColor = .black
+        label.textColor = .textPrimary
         label.font = .systemFont(ofSize: 16, weight: .bold)
         return label
     }()
@@ -33,7 +33,7 @@ class AccountView: UIView {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.textAlignment = .center
-        label.textColor = .systemGray
+        label.textColor = .textSecondary
         label.font = .systemFont(ofSize: 14, weight: .regular)
         
         let attributedText = NSMutableAttributedString(string: "Designer ")
@@ -54,7 +54,7 @@ class AccountView: UIView {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
         label.textAlignment = .center
-        label.textColor = .systemGray
+        label.textColor = .textSecondary
         label.font = .systemFont(ofSize: 14, weight: .regular)
         
         let attributedText = NSMutableAttributedString(string: "Developer ")
@@ -76,7 +76,7 @@ class AccountView: UIView {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "\u{00A9} 2025"
         label.textAlignment = .center
-        label.textColor = .systemGray
+        label.textColor = .textSecondary
         label.font = .systemFont(ofSize: 14, weight: .regular)
         return label
     }()
@@ -112,26 +112,27 @@ class AccountView: UIView {
     }
     
     private func setupUI() {
-        backgroundColor = .white
+        backgroundColor = .backgroundSecondary
 
         addSubview(userProfileView)
         addSubview(vStack)
         hStack.addArrangedSubview(appLabel)
         hStack.addArrangedSubview(logoImage)
+        hStack.addArrangedSubview(yearrLabel)
         vStack.addArrangedSubview(hStack)
         vStack.addArrangedSubview(designerLabel)
         vStack.addArrangedSubview(developerLabel)
-        vStack.addArrangedSubview(yearrLabel)
+       // vStack.addArrangedSubview(yearrLabel)
     }
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
             
-            userProfileView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor, constant: 16),
+            userProfileView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor),
             userProfileView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 16),
             userProfileView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -16),
 
-            vStack.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -32),
+            vStack.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -16),
             vStack.centerXAnchor.constraint(equalTo: centerXAnchor),
             
             logoImage.heightAnchor.constraint(equalToConstant: 20),

@@ -12,16 +12,30 @@ class CustomNavigationController: UINavigationController {
     let searchController: UISearchController = {
         let sc = UISearchController(searchResultsController: nil)
         sc.searchBar.placeholder = "Поиск по названию"
-        sc.searchBar.searchTextField.backgroundColor = .white
+        sc.searchBar.searchTextField.backgroundColor = .backgroundTertiary
         sc.searchBar.searchTextField.layer.cornerRadius = 25
         sc.searchBar.searchTextField.clipsToBounds = true
+        sc.searchBar.searchTextField.rightView = UIImageView(image: UIImage(systemName: "xmark.circle.fill"))
+        sc.searchBar.searchTextField.rightViewMode = .unlessEditing
         return sc
     }()
     
-    var trailingPadding: CGFloat = 16 {
+    let scannerButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.layer.cornerRadius = 20
+        button.setTitle("QR", for: .normal)
+        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
+        button.setImage(UIImage(systemName: "qrcode"), for: .normal)
+        button.tintColor = .textSecondary
+        button.backgroundColor = .buttonTertiary
+        return button
+    }()
+    
+    var trailingPadding: CGFloat = 24 {
            didSet {
                trailingConstraint?.constant = -trailingPadding
-               if trailingPadding == 16 {
+               if trailingPadding == 24 {
                    leadingConstraint?.constant = trailingPadding
                }
                UIView.animate(withDuration: 0.3) {
@@ -50,11 +64,11 @@ class CustomNavigationController: UINavigationController {
 
     private func setupNavigationBar() {
         navigationBar.prefersLargeTitles = false
-        navigationBar.tintColor = .black
+        navigationBar.tintColor = .buttonPrimary
         
         let appearance = UINavigationBarAppearance()
         appearance.configureWithOpaqueBackground()
-        appearance.backgroundColor = .background
+        appearance.backgroundColor = .backgroundPrimary
         appearance.shadowColor = .clear
         
         navigationBar.standardAppearance = appearance
@@ -63,23 +77,24 @@ class CustomNavigationController: UINavigationController {
         topViewController?.navigationItem.searchController = searchController
         topViewController?.navigationItem.hidesSearchBarWhenScrolling = false
         
-        DispatchQueue.main.async {
-                    self.setupSearchBarAppearance()
-        }
-        
+        //DispatchQueue.main.async {
+        //    self.setupSearchBarAppearance()
+        //}
     }
     
-    private func setupSearchBarAppearance() {
+    func setupSearchBarAppearance() {
         DispatchQueue.main.async { [weak self] in
-            guard let self else { return }
+            
+             guard let self else { return }
+            
+            self.searchController.searchBar.addSubview(scannerButton)
+            
              let searchTextField = self.searchController.searchBar.searchTextField
-             
-             searchTextField.backgroundColor = .white
+             searchTextField.backgroundColor = .backgroundTertiary
              searchTextField.layer.cornerRadius = 25
              searchTextField.clipsToBounds = true
-             
              searchTextField.translatesAutoresizingMaskIntoConstraints = false
-             
+            
             self.trailingConstraint = searchTextField.trailingAnchor.constraint(
                         equalTo: self.navigationBar.trailingAnchor,
                         constant: -self.trailingPadding
@@ -87,14 +102,19 @@ class CustomNavigationController: UINavigationController {
             
             self.leadingConstraint = searchTextField.leadingAnchor.constraint(
                 equalTo: self.navigationBar.leadingAnchor,
-                constant: self.trailingPadding
+                constant: 16//self.trailingPadding
             )
             
              NSLayoutConstraint.activate([
                  searchTextField.heightAnchor.constraint(equalToConstant: 50),
-                 searchTextField.widthAnchor.constraint(equalTo: self.searchController.searchBar.widthAnchor, constant: -32),
+                 searchTextField.widthAnchor.constraint(equalTo:self.searchController.searchBar.widthAnchor, constant: -32),
                  self.leadingConstraint!,
-                 self.trailingConstraint!
+                 self.trailingConstraint!,
+                 
+                 scannerButton.heightAnchor.constraint(equalToConstant: 40),
+                 scannerButton.widthAnchor.constraint(equalToConstant: 80),
+                 scannerButton.trailingAnchor.constraint(equalTo: searchTextField.trailingAnchor, constant: -5),
+                 scannerButton.topAnchor.constraint(equalTo: searchTextField.topAnchor, constant: 5),
              ])
              
             self.searchController.searchBar.layoutIfNeeded()
@@ -113,7 +133,7 @@ class CustomNavigationController: UINavigationController {
        }
     
     private func updateSearchController(for viewController: UIViewController) {
-        trailingPadding = 16
+        trailingPadding = 24
         viewController.navigationItem.searchController = searchController
         viewController.navigationItem.hidesSearchBarWhenScrolling = false
     }

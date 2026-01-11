@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Lottie
 
 final class AppCoordinator: Coordinator {
     
@@ -25,12 +26,29 @@ final class AppCoordinator: Coordinator {
     }
     
     func start() {
-        Task {
-            let isAuth = await googleSignIn.checkUserAuth()
-            if isAuth {
-                showMainFlow()
-            } else {
-                showAuthFlow()
+        let launchViewController = UIStoryboard(name: "LaunchScreen", bundle: nil).instantiateInitialViewController()!
+        self.window.rootViewController = launchViewController
+        self.window.makeKeyAndVisible()
+        setupLottieAnimation(on: launchViewController)
+       
+    }
+    
+    private func setupLottieAnimation(on viewController: UIViewController) {
+        let animationView = LottieAnimationView(name: "Animation")
+        animationView.backgroundColor = .backgroundAnimation
+        animationView.frame = viewController.view.bounds
+        animationView.contentMode = .scaleAspectFit
+        animationView.loopMode = .playOnce
+        viewController.view.addSubview(animationView)
+        animationView.animationSpeed = 0.7
+        animationView.play(fromFrame: 0, toFrame: 100, loopMode: .playOnce) { [weak self] _ in
+            Task {
+                let isAuth = await self?.googleSignIn.checkUserAuth()
+                if isAuth ?? false {
+                    self?.showMainFlow()
+                } else {
+                    self?.showAuthFlow()
+                }
             }
         }
     }
@@ -53,48 +71,22 @@ final class AppCoordinator: Coordinator {
     }
     
     private func showMainFlow() {
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
             
-//            let mainCoordinator = MainCoordinator(navigationController: mainNavigationController)
-//            mainCoordinator.start()
+            guard let self else { return }
             
             let tabBarController = MainTabBarController()
             
             let mainTab = self.createMainTab()
-            let scannerTab = self.createScannerTab()
+            //let favoriteTab = self.createFavoriteTab()
+          //  let scannerTab = self.createScannerTab()
             let accountTab = self.createAccountTab()
-            
-//            let mainViewModel = MainViewModel(
-//                googleSheetManager: googleSheetsService,
-//                        coreDataService: coreDataService,
-//                        coordinator: mainCoordinator
-//                    )
-//            
-//            let mainVC = MainViewController(viewModel: mainViewModel)
-//            let scanerVC = ScannerViewController(items: [])
-//            let accountVC = AccountViewController()
-//            
-//            let mainNavigationController = CustomNavigationController(viewController: mainVC)
-//            let scanerNavigationController = UINavigationController(rootViewController: scanerVC)
-//            let accountNavigationController = UINavigationController(rootViewController: accountVC)
-//            
-//            
-//            
-//            mainVC.coordinator = mainCoordinator
-//            accountVC.coordinator = self
-//            
-//            mainNavigationController.tabBarItem = UITabBarItem(title: "Sklad", image: UIImage(systemName: "tray.full.fill"), tag: 0)
-//            scanerNavigationController.tabBarItem = UITabBarItem(title: "Scaner", image: UIImage(systemName: "qrcode.viewfinder"), tag: 1)
-//            accountNavigationController.tabBarItem = UITabBarItem(title: "Account", image: UIImage(systemName: "person.crop.circle"), tag: 2)
-//            
-//            tabBarController.viewControllers = [mainNavigationController,scanerNavigationController, accountNavigationController]
-//            mainCoordinator.parentCoordinator = self
-//            self.addChild(mainCoordinator)
+
             guard let mainNavigationController = mainTab.navigationController as? CustomNavigationController else { return }
-            tabBarController.viewControllers = [mainNavigationController, scannerTab.navController, accountTab.navController]
+            tabBarController.viewControllers = [mainNavigationController/*, scannerTab.navController*/, accountTab.navController]
             
             mainTab.parentCoordinator = self
-                  self.addChild(mainTab)
+            self.addChild(mainTab)
             
             self.window.rootViewController = tabBarController
             self.window.makeKeyAndVisible()
@@ -103,7 +95,7 @@ final class AppCoordinator: Coordinator {
     }
     
     private func createMainTab() -> MainCoordinator {
-        let coordinator = MainCoordinator()
+        let coordinator = MainCoordinator(coreDataService: coreDataService)
         
         let viewModel = MainViewModel(
                     googleSheetsManager: googleSheetsService,
@@ -118,24 +110,54 @@ final class AppCoordinator: Coordinator {
         coordinator.navigationController = navController
 
         navController.tabBarItem = UITabBarItem(
-            title: "Sklad",
-            image: UIImage(systemName: "tray.full.fill"),
+            title: "Главная",
+            image: UIImage(systemName: "house.circle.fill"),
             tag: 0
         )
         
         return coordinator
     }
+    
+    private func createFavoriteTab() -> (navController: UINavigationController, coordinator: Coordinator) {
+        let coordinator = MainCoordinator(coreDataService: coreDataService)
+        
+        let viewModel = MainViewModel(
+                    googleSheetsManager: googleSheetsService,
+                    coreDataService: coreDataService,
+                    coordinator: coordinator
+                )
+        
+        let viewController = MainViewController(viewModel: viewModel)
+        viewController.coordinator = coordinator
+        
+        let navController = UINavigationController(rootViewController: viewController)
+        navController.tabBarItem = UITabBarItem(
+            title: "Избранное",
+            image: UIImage(systemName: "bookmark.circle.fill"),
+            tag: 1
+        )
+        
+        return (navController, self)
+    }
 
     private func createScannerTab() -> (navController: UINavigationController, coordinator: Coordinator) {
-        let viewController = ScannerViewController(items: [])
-        let navController = UINavigationController(rootViewController: viewController)
+        let scanerViewModel = ScanerViewModel(coreDataService: coreDataService)
+        let viewController = ScanerViewController(viewModel: scanerViewModel)
+        
+        let navController = CustomNavigationController(rootViewController: viewController)
+        navController.tabBarController?.isTabBarHidden = true
+        
+        let coordinator = ScannerCoordinator(coreDataService: coreDataService, navigationController: navController)
+        viewController.coordinator = coordinator
+        coordinator.parentCoordinator = self
+        self.addChild(coordinator)
+        
+        
         navController.tabBarItem = UITabBarItem(
             title: "Scaner",
             image: UIImage(systemName: "qrcode.viewfinder"),
             tag: 1
         )
-        
-        let coordinator = AuthCoordinator(navigationController: navController)//заглушка,написать ScanerCoordinator
         return (navController, coordinator)
     }
 
@@ -144,8 +166,8 @@ final class AppCoordinator: Coordinator {
         viewController.coordinator = self
         let navController = UINavigationController(rootViewController: viewController)
         navController.tabBarItem = UITabBarItem(
-            title: "Account",
-            image: UIImage(systemName: "person.crop.circle"),
+            title: "Профиль",
+            image: UIImage(systemName: "person.circle.fill"),
             tag: 2
         )
         

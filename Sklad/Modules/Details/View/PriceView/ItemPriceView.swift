@@ -17,7 +17,7 @@ class ItemPriceView: UIStackView {
         let label = UILabel()
         label.font = .systemFont(ofSize: 14, weight: .regular)
         label.textAlignment = .center
-        label.textColor = .black
+        label.textColor = .textPrimary
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -25,7 +25,7 @@ class ItemPriceView: UIStackView {
     private let priceContainerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .systemGray5
+        view.backgroundColor = .backgroundPriceView
         view.layer.cornerRadius = 8
         view.layer.masksToBounds = true
         return view
@@ -35,7 +35,7 @@ class ItemPriceView: UIStackView {
         let label = UILabel()
         label.font = .systemFont(ofSize: 12, weight: .regular)
         label.textAlignment = .center
-        label.textColor = .lightGray
+        label.textColor = .textSecondary
         label.text = "Цена,руб.:"
         label.translatesAutoresizingMaskIntoConstraints = false
         return label

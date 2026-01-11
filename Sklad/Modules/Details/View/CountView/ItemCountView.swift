@@ -16,7 +16,7 @@ final class ItemCountView: UIView {
     private let countAllLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.textColor = .black
+        label.textColor = .textPrimary
         label.textAlignment = .center
         label.font = .systemFont(ofSize: 18, weight: .regular)
         label.text = "Общее количество"
@@ -25,7 +25,7 @@ final class ItemCountView: UIView {
     private let countAll: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.textColor = .systemBlue
+        label.textColor = .buttonPrimary
         label.textAlignment = .center
         label.font = .systemFont(ofSize: 20, weight: .regular)
         label.text = "-"
@@ -35,6 +35,7 @@ final class ItemCountView: UIView {
         let imageView = UIImageView(image: UIImage(named: "box"))
         imageView.translatesAutoresizingMaskIntoConstraints = false
         imageView.contentMode = .scaleAspectFit
+        imageView.tintColor = .textPrimary
         return imageView
     }()
     
@@ -51,7 +52,7 @@ final class ItemCountView: UIView {
     private func setupUI() {
         translatesAutoresizingMaskIntoConstraints = false
         layer.borderWidth = 1
-        layer.borderColor = UIColor.systemGray6.cgColor
+        layer.borderColor = UIColor.backgroundTertiary.cgColor
         layer.masksToBounds = true
         layer.cornerRadius = 16
         
@@ -99,7 +100,9 @@ final class ItemCountView: UIView {
         
         let availableCount = item.stock.availableQuantity
         let testCount = item.stock.testedQuantity
+        print("item.stock.testedQuantity \(item.stock.testedQuantity)")
         let writeOffCount = item.stock.allocatedQuantity
+        print("item.stock.allocatedQuantity \(item.stock.allocatedQuantity)")
         let allCount = item.stock.totalQuantity
         
         countAvailable.text = formatNumber(availableCount)

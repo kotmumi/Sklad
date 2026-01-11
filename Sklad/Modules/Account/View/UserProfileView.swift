@@ -12,9 +12,10 @@ final class UserProfileView: UIView {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.translatesAutoresizingMaskIntoConstraints = false
-        label.text = "Профиль"
+        label.text = "Профиль сотрудника"
         label.textAlignment = .left
-        label.font = .systemFont(ofSize: 20, weight: .regular)
+        label.textColor = .textPrimary
+        label.font = .systemFont(ofSize: 24, weight: .bold)
         return label
     }()
     
@@ -44,7 +45,7 @@ final class UserProfileView: UIView {
         view.layer.cornerRadius = 45
         view.layer.borderWidth = 2
         view.clipsToBounds = true
-        view.layer.borderColor = UIColor.white.cgColor
+        view.layer.borderColor = UIColor.backgroundTertiary.cgColor
         return view
     }()
     
@@ -53,7 +54,7 @@ final class UserProfileView: UIView {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.font = .systemFont(ofSize: 45, weight: .bold)
         label.text = "A"
-        label.textColor = .systemBlue
+        label.textColor = .buttonPrimary.withAlphaComponent(80)
         label.textAlignment = .center
         return label
     }()
@@ -63,7 +64,7 @@ final class UserProfileView: UIView {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Имя"
         label.textAlignment = .left
-        label.textColor = .systemGray
+        label.textColor = .textSecondary
         label.font = .systemFont(ofSize: 12, weight: .regular)
         return label
     }()
@@ -73,6 +74,7 @@ final class UserProfileView: UIView {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Kirill"
         label.textAlignment = .left
+        label.textColor = .textPrimary
         label.font = .systemFont(ofSize: 14, weight: .regular)
         return label
     }()
@@ -82,7 +84,7 @@ final class UserProfileView: UIView {
         label.translatesAutoresizingMaskIntoConstraints = false
         label.text = "Email"
         label.textAlignment = .left
-        label.textColor = .systemGray
+        label.textColor = .textSecondary
         label.font = .systemFont(ofSize: 12, weight: .regular)
         return label
     }()
@@ -92,13 +94,13 @@ final class UserProfileView: UIView {
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.text = "Email@gmail.com"
         textField.textAlignment = .left
-        textField.textColor = .systemGray
+        textField.textColor = .textSecondary
         textField.isEnabled = false
         textField.font = .systemFont(ofSize: 14, weight: .regular)
         textField.layer.cornerRadius = 8
         textField.layer.borderWidth = 1
-        textField.layer.borderColor = UIColor.systemGray4.cgColor
-        textField.backgroundColor = .systemGray6
+        textField.layer.borderColor = UIColor.backgroundTertiary.cgColor
+        textField.backgroundColor = .backgroundSecondary
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 1))
         textField.leftViewMode = .always
         textField.rightView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 1))
@@ -106,12 +108,14 @@ final class UserProfileView: UIView {
         return textField
     }()
     
+    let userView = UserView()
+    
     let signOutButton: UIButton = {
        let button = UIButton(type: .system)
         button.translatesAutoresizingMaskIntoConstraints = false
-        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .regular)
+        button.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
         button.setTitle("Выйти", for: .normal)
-        button.backgroundColor = #colorLiteral(red: 0.9352422592, green: 0.7374092125, blue: 0.7222978784, alpha: 0.7824891427)
+        button.backgroundColor = .buttonTertiary
         button.layer.cornerRadius = 8
         button.tintColor = .red
         return button
@@ -129,7 +133,7 @@ final class UserProfileView: UIView {
     
     private func setupUI() {
         translatesAutoresizingMaskIntoConstraints = false
-        backgroundColor = .background
+        backgroundColor = .backgroundPrimary
         layer.cornerRadius = 25
         
         addSubview(titleLabel)
@@ -140,15 +144,18 @@ final class UserProfileView: UIView {
         vStack.addArrangedSubview(nameLabel)
         addSubview(emailLabel)
         addSubview(emailTextField)
+        addSubview(userView)
         addSubview(signOutButton)
+        
+        userView.titleLabel.text = "Сотрудник"
     }
     
     private func setupConstraints() {
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 32),
+            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 16),
             titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
             
-            containerView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 32),
+            containerView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 16),
             containerView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
             containerView.heightAnchor.constraint(equalToConstant: 90),
             containerView.widthAnchor.constraint(equalTo: containerView.heightAnchor),
@@ -163,7 +170,7 @@ final class UserProfileView: UIView {
             vStack.leadingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: 32),
             vStack.trailingAnchor.constraint(equalTo: trailingAnchor,constant: 16),
             
-            emailLabel.topAnchor.constraint(equalTo: containerView.bottomAnchor, constant: 32),
+            emailLabel.topAnchor.constraint(equalTo: containerView.bottomAnchor, constant: 16),
             emailLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
             emailLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
             
@@ -172,7 +179,11 @@ final class UserProfileView: UIView {
             emailTextField.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
             emailTextField.heightAnchor.constraint(equalToConstant: 50),
             
-            signOutButton.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 32),
+            userView.topAnchor.constraint(equalTo: emailTextField.bottomAnchor, constant: 16),
+            userView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
+            userView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
+            
+            signOutButton.topAnchor.constraint(equalTo: userView.bottomAnchor, constant: 16),
             signOutButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 32),
             signOutButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -32),
             signOutButton.heightAnchor.constraint(equalToConstant: 50),

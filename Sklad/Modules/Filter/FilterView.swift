@@ -16,7 +16,7 @@ class FilterView: UIView {
         stackView.axis = .horizontal
         stackView.spacing = 8
         stackView.distribution = .fillEqually
-        stackView.backgroundColor = .systemGroupedBackground
+        stackView.backgroundColor = .backgroundPrimary
         return stackView
     }()
     
@@ -25,8 +25,8 @@ class FilterView: UIView {
             let layout = UICollectionViewFlowLayout()
             layout.sectionInset = UIEdgeInsets(top: 0, left: 20, bottom: 0, right: 20)
             layout.scrollDirection = .vertical
-            layout.minimumLineSpacing = 8
-            layout.minimumInteritemSpacing = 10
+            layout.minimumLineSpacing = 16
+            layout.minimumInteritemSpacing = 16
             
             layout.headerReferenceSize = CGSize(width: 0, height: 44)
             layout.sectionHeadersPinToVisibleBounds = true
@@ -36,7 +36,7 @@ class FilterView: UIView {
         
         let view = UICollectionView(frame: .zero, collectionViewLayout: layout)
         view.translatesAutoresizingMaskIntoConstraints = false
-        view.backgroundColor = .systemGroupedBackground
+        view.backgroundColor = .backgroundPrimary
         return view
     }()
     
@@ -45,8 +45,8 @@ class FilterView: UIView {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle("Применить фильтр", for: .normal)
         button.titleLabel?.font = .systemFont(ofSize: 17, weight: .medium)
-        button.tintColor = .white
-        button.backgroundColor = .black
+        button.tintColor = .textPrimaryInv
+        button.backgroundColor = .buttonPrimary
         button.layer.cornerRadius = 25
         return button
     }()
@@ -62,7 +62,7 @@ class FilterView: UIView {
     }
     
     private func setupUI() {
-        backgroundColor = .systemGroupedBackground
+        backgroundColor = .backgroundPrimary
         addSubview(RactsCharCollectionView)
         addSubview(acceptButton)
     }

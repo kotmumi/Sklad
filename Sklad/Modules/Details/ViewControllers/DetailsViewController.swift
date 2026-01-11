@@ -6,22 +6,18 @@
 //
 
 import UIKit
+import Combine
 
-class DetailsViewController: UIViewController {
-    var coordinator: DetailsCoordinator?
+final class DetailsViewController: UIViewController {
     
-    private let detailsView: DetailsView = DetailsView()
+    private let viewModel: DetailsViewModel
+    private weak var coordinator: DetailsCoordinator?
+    private let detailsView = DetailsView()
+    private var cancellabeles: Set<AnyCancellable> = []
     
-    private let item: Item
-    private let writeOff: [ItemWriteOff]
-    lazy var tests: [ItemWriteOff] = writeOff.filter { $0.status == "Взял на тесты"}
-    lazy var writeOffs: [ItemWriteOff] = writeOff.filter { $0.status == "На списание"}
-    
-   
-    
-    init(item: Item, writeOff: [ItemWriteOff]) {
-        self.item = item
-        self.writeOff = writeOff
+    init(coordinator: DetailsCoordinator, viewModel: DetailsViewModel) {
+        self.coordinator = coordinator
+        self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -30,34 +26,44 @@ class DetailsViewController: UIViewController {
     }
     
     override func loadView() {
-        super.loadView()
         view = detailsView
     }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        bindViewModel()
+        bindViewAction()
+                
+        viewModel.viewDidLoad.send()
+        
+        Task {
+            try await viewModel.fetchProjects()
+        }
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         configNavigationBar()
     }
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        configNavigationBar()
-    }
+}
 
+extension DetailsViewController {
     
     private func setupUI() {
-        detailsView.writeOffButton.addTarget(self, action: #selector(handleWriteOff), for: .touchUpInside)
-        detailsView.segmentedControl.segmentedControl.addTarget(self, action: #selector(handleValueChanged), for: .valueChanged)
         detailsView.tableView.dataSource = self
-        detailsView.tableView.delegate = self
+       // detailsView.tableView.delegate = self
+        //detailsView.tableView.allowsSelection = false
         
         detailsView.tableView.register(HeaderViewCell.self, forCellReuseIdentifier: HeaderViewCell.reuseIdentifier)
         detailsView.tableView.register(InfoViewCell.self, forCellReuseIdentifier: InfoViewCell.reuseIdentifier)
         detailsView.tableView.register(WriteOffViewCell.self, forCellReuseIdentifier: WriteOffViewCell.reuseIdentifier)
+        
+        detailsView.writeOffButton.addAction(UIAction(handler: { [weak self]_ in
+            self?.viewModel.navigateToWriteOff.send()
+        }), for: .touchUpInside)
+       
     }
     
     private func configNavigationBar() {
@@ -66,75 +72,102 @@ class DetailsViewController: UIViewController {
         }
         navController.navigationBar.isHidden = false
         navController.isSearchBarHidden = true
-        navigationItem.title = "Остатки"
         
         let rackView = RackView()
-        rackView.config(rack: item.location.full)
-        let customBarButtonItem = UIBarButtonItem(customView: rackView)
-        navigationItem.rightBarButtonItem = customBarButtonItem
+        rackView.config(rack: viewModel.item.location.full)
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: rackView)
+    }
+    
+    private func bindViewModel() {
+        viewModel.$viewState
+            .receive(on: DispatchQueue.main)
+            .compactMap { $0 }
+            .sink { [weak self] viewState in
+                self?.updateUI(with: viewState)
+            }
+            .store(in: &cancellabeles)
         
+        viewModel.navigateToWriteOff
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] _ in
+                self?.coordinator?.goToWriteOff()
+            }
+            .store(in: &cancellabeles)
+        
+        viewModel.$navigationTitle
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.title, on: navigationItem)
+            .store(in: &cancellabeles)
+        
+        viewModel.isLoading
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+            
+                self?.detailsView.tableView.reloadData()
+            }
+            .store(in: &cancellabeles)
     }
     
-    @objc
-    private func handleValueChanged() {
+    private func bindViewAction() {
+        let segmentedControl = detailsView.segmentedControl.segmentedControl
+        
+        segmentedControl.addTarget(self, action: #selector(segmentedControlValueChanged), for: .valueChanged)
+    }
+    
+    @objc private func segmentedControlValueChanged(_ sender: UISegmentedControl) {
+        viewModel.segmentChanged.send(sender.selectedSegmentIndex)
+    }
+    
+    private func restoreWriteOff (item: ItemWriteOff) async throws {
+        try await viewModel.deleteWriteOff(item: item)
+    }
+    
+    private func updateUI(with viewState: DetailsViewState) {
+//        detailsView.segmentedControl.segmentedControl.selectedSegmentIndex = viewState.selectedStatus.segmentIndex
+//        detailsView.segmentedControl.segmentedControl.selectedSegmentTintColor = viewState.selectedStatus.color
+//        
+        detailsView.writeOffButton.isHidden = viewState.isWriteOffButtonHidden
+        
         detailsView.tableView.reloadData()
-        switch detailsView.segmentedControl.segmentedControl.selectedSegmentIndex {
-        case 0:
-            detailsView.writeOffButton.isHidden = false
-        default:
-            detailsView.writeOffButton.isHidden = true
-        }
-    }
-    
-    @objc
-    private func handleWriteOff() {
-        coordinator?.goToWriteOff()
     }
 }
 
-
 extension DetailsViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        switch detailsView.segmentedControl.segmentedControl.selectedSegmentIndex {
-        case 0:
-            return 2
-        case 1:
-            return tests.count + 1
-        case 2:
-            return writeOffs.count + 1
-        default:
-            return 1
-        }
-        
+        viewModel.viewState?.tableData.numberOfRows ?? 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let headerCell = tableView.dequeueReusableCell(withIdentifier: HeaderViewCell.reuseIdentifier, for: indexPath) as? HeaderViewCell else {
+        guard let cellType = viewModel.viewState.flatMap({ _ in viewModel.cellType(for: indexPath) }) else {
             return UITableViewCell()
         }
         
-        guard let infoCell = tableView.dequeueReusableCell(withIdentifier: InfoViewCell.reuseIdentifier, for: indexPath) as? InfoViewCell else {
-            return UITableViewCell()
-        }
-        
-        guard let writeOffCell = tableView.dequeueReusableCell(withIdentifier: WriteOffViewCell.reuseIdentifier, for: indexPath) as? WriteOffViewCell else {
-            return UITableViewCell()
-        }
-        
-        switch indexPath.row {
-            case 0:
-            headerCell.config(item: item)
-            return headerCell
-        case 1 where detailsView.segmentedControl.segmentedControl.selectedSegmentIndex == 0:
-            infoCell.config(item: item, writeOff: writeOff)
-            return infoCell
-        default:
-            if detailsView.segmentedControl.segmentedControl.selectedSegmentIndex == 1 {
-                writeOffCell.config(item: tests[indexPath.row-1], isTest: true)
-            } else  {
-                writeOffCell.config(item: writeOffs[indexPath.row-1], isTest: false)
+        switch cellType {
+        case .header(let item):
+            let cell = tableView.dequeueReusableCell(withIdentifier: HeaderViewCell.reuseIdentifier, for: indexPath) as! HeaderViewCell
+            cell.config(item: item)
+            return cell
+            
+        case .info(let item, let writeOffs):
+            let cell = tableView.dequeueReusableCell(withIdentifier: InfoViewCell.reuseIdentifier, for: indexPath) as! InfoViewCell
+            cell.config(item: item, writeOff: writeOffs)
+            return cell
+            
+        case .writeOff(let item, let isTest):
+            let cell = tableView.dequeueReusableCell(withIdentifier: WriteOffViewCell.reuseIdentifier, for: indexPath) as! WriteOffViewCell
+            
+            cell.config(item: item, isTest: isTest) { [weak self] in
+                Task {
+                    self?.coordinator?.showReturnItemAlert(item.name, item.quantity)
+                    try await self?.restoreWriteOff(item: item)
+                    self?.viewModel.removeWriteOffItem(at: item.id)
+                  //  DispatchQueue.main.async() {
+                    //    tableView.reloadData()
+                    //}
+                    
+                }
             }
-            return writeOffCell
+            return cell
         }
     }
 }
