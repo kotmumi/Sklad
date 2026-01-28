@@ -1,14 +1,177 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Sklad App</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sklad - Warehouse Management</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        .badges {
+            margin: 20px 0;
+        }
+        .badge {
+            display: inline-block;
+            margin: 5px;
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        .screenshots {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        .screenshot {
+            text-align: center;
+        }
+        .screenshot img {
+            width: 250px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid #ddd;
+        }
+        .features, .tech-stack {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin: 10px 0;
+        }
+        .installation {
+            background: #e8f4f8;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .required-links {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0;
+            border: 1px solid #ffeaa7;
+        }
+        .required-links a {
+            color: #e17055;
+            font-weight: bold;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .required-links a:hover {
+            text-decoration: underline;
+        }
+        code {
+            background: #2d3436;
+            color: #dfe6e9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
 </head>
 <body>
-    <h1>Sklad App</h1>
-    <p>Inventory management application</p>
-    
-    <!-- ОБЯЗАТЕЛЬНО добавь эту ссылку! -->
-    <p><a href="privacy.html">Privacy Policy</a></p>
-    <p><a href="terms.html">Terms of Service</a></p>
+    <header>
+        <h1>📦 Sklad Warehouse Management</h1>
+        <p>iOS application for warehouse management system</p>
+        
+        <div class="badges">
+            <span class="badge" style="background: #FF6B6B; color: white;">Swift 5.0</span>
+            <span class="badge" style="background: #4ECDC4; color: white;">iOS 15.0+</span>
+            <span class="badge" style="background: #FFD166; color: #333;">MVC Architecture</span>
+        </div>
+    </header>
+
+    <section>
+        <p>iOS application for a warehouse management system, designed to digitize logistics processes within a division of the company "Savushkin Product."</p>
+        <p>The application enables tracking of the receipt, movement, and write-off of materials, preventing losses and ensuring full transparency of operations.</p>
+    </section>
+
+    <div class="screenshots">
+        <div class="screenshot">
+            <img src="https://github.com/user-attachments/assets/3178784c-feb5-4590-bcef-6a5b3e80b0fd" alt="Main Screen">
+            <p>Main Screen</p>
+        </div>
+        <div class="screenshot">
+            <img src="https://github.com/user-attachments/assets/fca46de0-dee0-4a42-b417-75329a802b56" alt="Details Screen">
+            <p>Details Screen</p>
+        </div>
+        <div class="screenshot">
+            <img src="https://github.com/user-attachments/assets/076959f6-6847-47b0-9c1e-cc01e2e8ba21" alt="Write-off Screen">
+            <p>Write-off Screen</p>
+        </div>
+    </div>
+
+    <div class="features">
+        <h2>🚀 Features</h2>
+        <ul>
+            <li>🔐 <strong>User Authentication</strong> via login and password</li>
+            <li>📦 <strong>Inventory Management:</strong> Adding, editing, viewing, and writing off product items</li>
+            <li>📷 <strong>Barcode Scanning:</strong> Integration with device's camera for quick product search</li>
+            <li>🌐 <strong>Real-time Operation:</strong> All changes synchronized between devices</li>
+            <li>📊 <strong>Operations History:</strong> Log of all warehouse operations (receipt, write-off, transfer)</li>
+        </ul>
+    </div>
+
+    <div class="tech-stack">
+        <h2>💻 Tech Stack</h2>
+        <ul>
+            <li><strong>UI Framework:</strong> UIKit</li>
+            <li><strong>Architecture:</strong> MVC (Model-View-Controller)</li>
+            <li><strong>Local Storage:</strong> CoreData</li>
+            <li><strong>Networking:</strong> REST API</li>
+            <li><strong>Concurrency:</strong> async/await</li>
+        </ul>
+    </div>
+
+    <div class="installation">
+        <h2>📦 Installation</h2>
+        <ol>
+            <li>Clone the repository</li>
+            <li>Open <code>Sklad.xcodeproj</code></li>
+            <li>Install dependencies (if any)</li>
+            <li>Build and run the project</li>
+        </ol>
+    </div>
+
+    <!-- ОБЯЗАТЕЛЬНО для Google OAuth -->
+    <div class="required-links">
+        <h3>📄 Legal Documents (Required for Google OAuth)</h3>
+        <p>
+            <a href="privacy.html">🔒 Privacy Policy</a> | 
+            <a href="terms.html">📝 Terms of Service</a>
+        </p>
+        <p><small>These links are required by Google Cloud Console for OAuth verification</small></p>
+    </div>
+
+    <footer style="text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; color: #666;">
+        <p>Sklad Warehouse Management System © 2024</p>
+        <p>Designed for Savushkin Product division</p>
+    </footer>
 </body>
 </html>
